@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<head>
+<title>Xu Liu</title>
+</head>
+
+<body>
+
+
+<h2><center>Xu Liu</center></h2>
+<hr>
+<h3>
+ 
+<center>
+<A HREF="../index.html">Home Page</A>
+&nbsp;|&nbsp; 
+<A HREF="../theory/theory.html">Computational Theory</A>
+&nbsp;|&nbsp; 
+<A HREF="../arch/arch.html">Architecture</A>
+&nbsp;|&nbsp;
+<A HREF="../algorithm/algo.html">Algorithm</A> 
+&nbsp;|&nbsp;
+<A HREF="./system.html">System Design</A>
+&nbsp;|&nbsp;
+<A HREF="https://github.com/liuxu1005">Github</A> 
+&nbsp;|&nbsp;
+<A HREF="../cv.pdf">CV</A> 
+</center>
+ 
+</h3> 
+<hr>
+
+Goals:
+
+  Performance, Scalability, Security
+<br>
+Tools:
+
+  Abstraction, Modular, Layer
+<br>
+Problems need consideration:
+
+  Usage & Constraints
+  Bottleneck
+  Consistency
+  Security
+  Naming
+<br>
+Principles and Experiences:
+  KISS
+  Tradeoff
+  End-to-end
+  Idempotent
+  Metcalfe's law
+  Amdahl's law
+  Postel's law
+  Rule of least power
+  Partial understanding
+  Versioning
+<br>  
+Traditional Model & Examples
+  Client/Server, MVC, RPC, Two phase transaction
+  Stateful/Stateless, Text/Binary
+  Overlay Networks, Distributed Hash Table
+ 
+</body>
+</html>
