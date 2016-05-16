@@ -60,7 +60,7 @@ Principles and Experiences:
   Partial understanding
   Versioning
 <br>  
-Traditional Model & Examples
+Traditional Model & Examples:
   Client/Server, MVC, RPC, Two phase transaction
   Stateful/Stateless, Text/Binary
   Overlay Networks, Distributed Hash Table

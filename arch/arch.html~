@@ -31,7 +31,15 @@
  
 </h3> 
 <hr>
- 
+Power wall & memory wall => parallelism
+<br>
+Instruction level parallelism: pipeline, branch prediction, out of order execution
+<br>
+Data level parallelism: GPU, Vector processor
+<br>
+Thread level parallelism: multiple processors, memory coherency
+<br>
+Request level parallelism: warehouse-scale computors
 
 </body>
 </html>
