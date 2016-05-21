@@ -1,21 +1,22 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en-us">
 <head>
 <meta charset="utf-8">
 <style>
 #nav {
+    margin-top: 50px;
     line-height:30px;
     background-color:lightgrey;
     height:300px;
-    width:150px;
+    width:250px;
     float:left;
-    padding:50px;
+    padding:10px;
 }
 
 #section {
-    width:350px;
+   
     float:left;
-    padding:45px;
+    padding:40px;
 }
 </style>
 <head>
@@ -47,22 +48,28 @@
  
 </h3> 
 <hr>
-<div id="nav".
-<h4> <a href="./geometry/triangulation.html" target="_blank">
- 
-    Test Java Applet
-    </a>
-    </h4>
-
-<h4> 
+<div id="nav">
+<ul>
+<li> Basics</li>
+<li> AI</li>
+<li> Geometry
+    <ul>
+        <a href="./geometry/triangulation.html" target="_blank">Triangulation</a>
+     
+    </ul>
+</li>
+<li>Graphics
+    <ul>
     <a href="./graphics/webgltest.html" target="_blank">
         Test webGL
     </a>
-</h4>
+    </ul>
+</li>
+</ul>
 </div>
 
 <div id="section">
-<p>To add  </p>
+<p>There are lots of various interesting algorithms. I will accumulate some here gradually.  </p>
 </div>
 </body>
 </html>
