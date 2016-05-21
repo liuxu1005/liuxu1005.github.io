@@ -9,14 +9,14 @@
     line-height:30px;
     background-color:lightgrey;
     height:300px;
-    width:50%;
+    width:20%;
     float:left;
     padding:10px;
 }
 
 #section {
-    width:30%;
-    float:left;
+    width:70%;
+    
     padding:40px;
 }
 </style>

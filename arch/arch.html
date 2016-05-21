@@ -2,6 +2,24 @@
 <html>
 <head>
 <meta charset="utf-8">
+<style>
+#nav {
+    margin-top: 50px;
+   
+    line-height:30px;
+    background-color:lightgrey;
+    height:300px;
+    width:20%;
+    float:left;
+    padding:10px;
+}
+
+#section {
+    width:70%;
+    float:right;
+    padding:40px;
+}
+</style>
 <head>
 <title>Architecture</title>
 </head>
@@ -31,15 +49,34 @@
  
 </h3> 
 <hr>
-Power wall & memory wall => parallelism
-<br>
-Instruction level parallelism: pipeline, branch prediction, out of order execution
-<br>
-Data level parallelism: GPU, Vector processor
-<br>
-Thread level parallelism: multiple processors, memory coherency
-<br>
-Request level parallelism: warehouse-scale computors
+<div id="nav">
+<ul>
+<li>CPU</li>
+<li>GPU</li>
+    <ul>
+    <li>Sorting on GPU</li>
+    </ul>
+<li>SMP</li>
+<li>Warehouse</li>
+</ul>
+</div>
 
+<div id="section">
+<ul>
+<li>Power wall & memory wall => parallelism</li>
+<li>
+Instruction level parallelism: pipeline, branch prediction, out of order execution
+</li>
+<li>
+Data level parallelism: GPU, Vector processor
+</li>
+<li>
+Thread level parallelism: multiple processors, memory coherency
+</li>
+<li>
+Request level parallelism: warehouse-scale computors
+</li>
+</ul>
+</div>
 </body>
 </html>

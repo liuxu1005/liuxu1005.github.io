@@ -2,11 +2,19 @@
 <html>
 <head>
 <meta charset="utf-8">
+<style>
+#section {
+    margin-top: 20px;
+    margin-left:8%;
+    float:left;
+    padding:10px;
+}
+</style>
 <head>
 <title>Theory</title>
 </head>
 
-<body>
+<body style="background-color:#eeeeee">
 
 
 <h2><center>Xu Liu</center></h2>
@@ -31,26 +39,29 @@
  
 </h3> 
 <hr>
-Russell's paradox
-<br>
-Gödel's incompleteness theorems
-<br>
-Cantor's diagonal method
-<br>
-Halting problem
-<br>
-Turing machine
-<br>
-Lambda calculus
-<br>
-Fixed point combinator
-<br>
-Recursion
-<br>
-P, NP, NPC
-<br>
-Programming language
+<div id="section">
+<ul>
+<li>Russell's paradox</li>
+ 
+<li>Gödel's incompleteness theorems</li>
 
+<li>Cantor's diagonal method</li>
+
+<li>Halting problem</li>
+
+<li>Turing machine</li>
+
+<li>Lambda calculus</li>
+
+<li>Fixed point combinator</li>
+
+<li>Recursion</li>
+
+<li>P, NP, NPC</li>
+
+<li>Programming language</li>
+</ul>
+</div>
 
 </body>
 </html>

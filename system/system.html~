@@ -2,11 +2,29 @@
 <html>
 <head>
 <meta charset="utf-8">
+<style>
+#nav {
+    margin-top: 50px;
+   
+    line-height:30px;
+    background-color:lightgrey;
+    height:300px;
+    width:20%;
+    float:left;
+    padding:10px;
+}
+
+#section {
+    width:70%;
+    float:right;
+    padding:40px;
+}
+</style>
 <head>
 <title>System</title>
 </head>
 
-<body>
+<body style="background-color:#eeeeee">
 
 
 <h2><center>Xu Liu</center></h2>
@@ -32,6 +50,16 @@
 </h3> 
 <hr>
 
+<div id="nav">
+<ul>
+<li>DNS</li>
+<li>Unix</li>
+<li>RON</li>
+<li>DHT</li>
+<li> <a href="./FinalReport.html" target="_blank">CCN</a></li>  
+</ul>
+</div>
+<div id="section">
 Goals:
 
   Performance, Scalability, Security
@@ -56,7 +84,6 @@ Principles and Experiences:
   Metcalfe's law
   Amdahl's law
   Postel's law
-  Rule of least power
   Partial understanding
   Versioning
 <br>  
@@ -64,6 +91,6 @@ Traditional Model & Examples:
   Client/Server, MVC, RPC, Two phase transaction
   Stateful/Stateless, Text/Binary
   Overlay Networks, Distributed Hash Table
- 
+</div> 
 </body>
 </html>
