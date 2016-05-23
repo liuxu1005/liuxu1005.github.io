@@ -33,8 +33,8 @@
  
 </h3> 
 <hr>
-<div style="text-align:center">
+<center>
 <object id="cv" width="90%" height="500px" data="cv.pdf" />
-</div>
+</center>
 </body>
 </html>

@@ -1,26 +1,42 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en-us">
 <head>
 <meta charset="utf-8">
+<style>
+#nav {
+    margin-top: 3%;
+   
+    line-height:30px;
+    background-color:lightgrey;
+    height:70%;
+    width:20%;
+    float:left;
+    padding:1%;
+}
+
+#section {
+    width:70%;
+    float:right;
+    padding:1%;
+}
+</style>
 <head>
-<title>Xu Liu</title>
+<title>Alogrithm</title>
 </head>
 
 <body style="background-color:#eeeeee">
 
 
-<h2><center>Xu Liu </center></h2>
+<h2><center>Xu Liu</center></h2>
 <hr>
 <h3>
  
 <center>
-<A HREF="./index.html">Home Page</A>
-&nbsp;|&nbsp; 
 <A HREF="./theory/theory.html">Computational Theory</A>
 &nbsp;|&nbsp; 
 <A HREF="./arch/arch.html">Architecture</A>
 &nbsp;|&nbsp;
-<A HREF="./algorithm/algo.html">Algorithm</A> 
+<A HREF="./index.html">Algorithm</A> 
 &nbsp;|&nbsp;
 <A HREF="./system/system.html">System Design</A>
 &nbsp;|&nbsp;
@@ -31,12 +47,28 @@
  
 </h3> 
 <hr>
- 
-<p style="margin-left:90px; margin-right:90px; font-size:20px;" >
-I am graduating this August from Tufts University with Computer Science Master Degree.
-I am very interested in computer science. I just construct this web page
-for deposition of computer science knowledge for the future after I leave school.
-</p>
-<h3><center>This website is still under construction. (May 16, 2016)</center></h3>
+<div id="nav">
+<ul>
+<li> Basics</li>
+<li> AI</li>
+<li> Geometry
+    <ul>
+        <a href="./geometry/triangulation.html" target="_blank">Triangulation</a>
+     
+    </ul>
+</li>
+<li>Graphics
+    <ul>
+    <a href="./graphics/webgltest.html" target="_blank">
+        Test webGL
+    </a>
+    </ul>
+</li>
+</ul>
+</div>
+
+<div id="section">
+<p>There are lots of various interesting algorithms. I will accumulate some here gradually.  </p>
+</div>
 </body>
 </html>
