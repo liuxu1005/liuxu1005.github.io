@@ -1,0 +1,257 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>Water</title>
+</head>
+<script src="gl-matrix-min.js"></script>
+<script src="camera.js"></script>
+
+<script id="main"> 
+
+var canvas;
+var gl;
+ 
+ 
+var vs =
+    'attribute vec3 aVertexPosition;\
+     attribute vec3 aVertexNormal;\
+     uniform mat4 uMVMatrix;\
+     uniform mat4 uPMatrix;\
+     varying float product;\
+     void main(void) {\
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\
+        vec3 l = vec3(0.0, 0.0, -1.0);\
+        vec3 nor = normalize(aVertexNormal);\
+        product = max(dot(l, nor), 0.0);\
+    }';
+    
+var fs =
+    'varying mediump float product;\
+     void main(void) {\
+         gl_FragColor = product * vec4(0.8, 0.6, 0.3, 1.0);\
+     }';
+     
+var program;    
+var perspectiveMatrix;
+var modelviewMatrix;
+
+var vertexBuffer;
+var normalBuffer;
+
+var mouseDown = false;
+ 
+var startX = 0.0;
+var startY = 0.0;
+var camera = new Camera();   
+
+function initProgram () {
+    //compile shader
+    vshader = gl.createShader(gl.VERTEX_SHADER);
+    fshader = gl.createShader(gl.FRAGMENT_SHADER);
+    
+    gl.shaderSource(vshader, vs);
+    gl.compileShader(vshader);
+    
+    gl.shaderSource(fshader, fs);
+    gl.compileShader(fshader);
+
+    program = gl.createProgram();
+    gl.attachShader(program, vshader);
+    gl.attachShader(program, fshader);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+} 
+
+function initBuffer () {
+    //draw object
+    var obj = new Float32Array(
+               [-0.5, -0.5 , 0.5, 
+                0.5, -0.5, 0.5, 
+                0.5, 0.5, 0.5, 
+                -0.5, -0.5 , 0.5,  
+                0.5, 0.5, 0.5, 
+                -0.5, 0.5, 0.5,
+                
+                0.5, -0.5 , 0.5, 
+                0.5, -0.5, -0.5, 
+                0.5, 0.5, -0.5, 
+                0.5, -0.5 , 0.5,  
+                0.5, 0.5, -0.5, 
+                0.5, 0.5, 0.5, 
+                
+                -0.5, -0.5 , -0.5, 
+                0.5, -0.5, -0.5, 
+                0.5, 0.5, -0.5, 
+                -0.5, -0.5 , -0.5,  
+                0.5, 0.5, -0.5, 
+                -0.5, 0.5, -0.5,
+                
+                -0.5, -0.5 , 0.5, 
+                -0.5, -0.5, -0.5, 
+                -0.5, 0.5, -0.5, 
+                -0.5, -0.5 , 0.5,  
+                -0.5, 0.5, -0.5, 
+                -0.5, 0.5, 0.5, 
+                
+                -0.5, 0.5 , 0.5, 
+                0.5, 0.5, 0.5, 
+                0.5, 0.5, -0.5, 
+                -0.5, 0.5 , 0.5,  
+                0.5, 0.5, -0.5, 
+                -0.5, 0.5, -0.5, 
+                
+                -0.5, -0.5 , 0.5, 
+                0.5, -0.5, 0.5, 
+                0.5, -0.5, -0.5, 
+                -0.5, -0.5 , 0.5,  
+                0.5, -0.5, -0.5, 
+                -0.5, -0.5, -0.5]);
+    var normals = new Float32Array(
+           [-0.5, -0.5 , 0.5, 
+                0.5, -0.5, 0.5, 
+                0.5, 0.5, 0.5, 
+                -0.5, -0.5 , 0.5,  
+                0.5, 0.5, 0.5, 
+                -0.5, 0.5, 0.5,
+                
+                0.5, -0.5 , 0.5, 
+                0.5, -0.5, -0.5, 
+                0.5, 0.5, -0.5, 
+                0.5, -0.5 , 0.5,  
+                0.5, 0.5, -0.5, 
+                0.5, 0.5, 0.5, 
+                
+                -0.5, -0.5 , -0.5, 
+                0.5, -0.5, -0.5, 
+                0.5, 0.5, -0.5, 
+                -0.5, -0.5 , -0.5,  
+                0.5, 0.5, -0.5, 
+                -0.5, 0.5, -0.5,
+                
+                -0.5, -0.5 , 0.5, 
+                -0.5, -0.5, -0.5, 
+                -0.5, 0.5, -0.5, 
+                -0.5, -0.5 , 0.5,  
+                -0.5, 0.5, -0.5, 
+                -0.5, 0.5, 0.5, 
+                
+                -0.5, 0.5 , 0.5, 
+                0.5, 0.5, 0.5, 
+                0.5, 0.5, -0.5, 
+                -0.5, 0.5 , 0.5,  
+                0.5, 0.5, -0.5, 
+                -0.5, 0.5, -0.5, 
+                
+                -0.5, -0.5 , 0.5, 
+                0.5, -0.5, 0.5, 
+                0.5, -0.5, -0.5, 
+                -0.5, -0.5 , 0.5,  
+                0.5, -0.5, -0.5, 
+                -0.5, -0.5, -0.5]);         
+
+    vertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, obj, gl.STATIC_DRAW);
+    program.v = gl.getAttribLocation(program, 'aVertexPosition');
+    gl.enableVertexAttribArray(program.v);
+
+    
+    normalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, normals, gl.STATIC_DRAW);
+    program.n = gl.getAttribLocation(program, 'aVertexNormal');
+    gl.enableVertexAttribArray(program.n);
+
+}
+
+function drawMyScene () {
+
+            
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.DEPTH_TEST);
+    
+ 
+        program.pMatrixUniform = gl.getUniformLocation(program, "uPMatrix");
+        gl.uniformMatrix4fv(program.pMatrixUniform, false, camera.getPMatrix());
+
+        program.mvMatrixUniform = gl.getUniformLocation(program, "uMVMatrix");
+        gl.uniformMatrix4fv(program.mvMatrixUniform, false, camera.getMVMatrix());
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.vertexAttribPointer(program.v, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.vertexAttribPointer(program.n, 3, gl.FLOAT, false, 0, 0);    
+        gl.drawArrays(gl.TRIANGLES, 0, 36); 
+}
+
+function initWebgl() {
+    canvas = document.getElementById('water');
+    gl = canvas.getContext('webgl');
+    gl.viewportWidth = canvas.clientWidth;
+	gl.viewportHeight = canvas.clientHeight;
+}
+function main() {
+
+
+    initWebgl();
+    initProgram();
+    initBuffer();
+ 
+    drawMyScene();    
+}
+
+function myMouseDown(mouseEvent) {
+ 
+    startX = (mouseEvent.clientX * 2 - gl.viewportWidth)/gl.viewportWidth;
+    startY = (gl.viewportHeight - mouseEvent.clientY * 2)/gl.viewportHeight;
+    mouseDown = true;
+}
+function myMouseMove(mouseEvent) {
+    var curX = (mouseEvent.clientX * 2 - gl.viewportWidth)/gl.viewportWidth;
+    var curY = (gl.viewportHeight - mouseEvent.clientY * 2)/gl.viewportHeight;
+ 
+    if (mouseDown) {
+        camera.rotate(startX, startY, curX, curY);
+        drawMyScene();
+    }
+    startX = curX;
+    startY = curY; 
+         
+
+}
+function myMouseUp(mouseEvent) {
+    mouseDown = false;
+ 
+ 
+}
+function myMouseOut(mouseEvent) {
+    mouseDown = false;
+ 
+}
+function myMouseWheel(mouseEvent) {
+
+    var delta = mouseEvent.wheelDelta || (mouseEvent.detail * -1);
+    if (delta >= 0) {
+        camera.zoom(true);
+    }
+    else if (delta < 0) {
+        camera.zoom(false); 
+    } else { return; }
+ 
+    drawMyScene(); 
+}
+
+</script>
+<body onload="main();">
+<canvas id="water" width="600" height="600" onmousedown="myMouseDown(event)"    
+        onmousemove="myMouseMove(event)" onmouseup="myMouseUp(event)" 
+        onmouseout="myMouseOut(event)" onwheel="myMouseWheel(event)"
+        style="width:600px; height:600px">
+Water
+</canvas>
+
+</body>
+
+</html>
