@@ -4,12 +4,12 @@ function Camera() {
 
     this.near = 0.1;
     this.far = 100.0;
-    this.eye = quat.fromValues(0.0, 0.0, 5.0, 1.0);
+    this.eye = quat.fromValues(0.0, 0.0, 10.0, 1.0);
     this.focus = quat.fromValues(0.0, 0.0, 0.0, 1.0);
     this.up = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
     this.rotation = mat4.create();
     this.ratio = 1.0;
-    this.fovy = 1.0;
+    this.fovy = 0.8;
     
  
    
