@@ -32,13 +32,12 @@
 <h3>
  
 <center>
-<A HREF="../index.html">Home Page</A>
-&nbsp;|&nbsp; 
+ 
 <A HREF="../theory/theory.html">Computational Theory</A>
 &nbsp;|&nbsp; 
 <A HREF="./arch.html">Architecture</A>
 &nbsp;|&nbsp;
-<A HREF="../algorithm/algo.html">Algorithm</A> 
+<A HREF="../index.html">Algorithm</A> 
 &nbsp;|&nbsp;
 <A HREF="../system/system.html">System Design</A>
 &nbsp;|&nbsp;
@@ -51,12 +50,16 @@
 <hr>
 <div id="nav">
 <ul>
-<li>CPU</li>
-<li>GPU</li>
+<li>FSM + Memory</li>
+<li>ISA</li>
+<li>Data Path</li>
+<li>Pipeline</li>
+<li>Superscalar/VLIW</li>
+<li>SIMD</li>
     <ul>
     <li>Sorting on GPU</li>
     </ul>
-<li>SMP</li>
+<li>MIMD</li>
 <li>Warehouse</li>
 </ul>
 </div>
