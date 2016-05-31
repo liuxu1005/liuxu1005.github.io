@@ -22,7 +22,7 @@ function fShader() {
     var fs =
     'varying mediump float product;\
      void main(void) {\
-         gl_FragColor = product * vec4(0.8, 0.6, 0.3, 1.0);\
+         gl_FragColor = product * vec4(0.8, 0.6, 0.3, 0.8);\
      }';
      
     return fs;
