@@ -37,6 +37,12 @@ function Camera() {
     this.getEye = function () {
         return this.eye;
     }
+    this.getNear = function () {
+        return this.near;
+    }
+    this.getFar = function () {
+        return this.far;
+    }
     this.setPerspective = function (fovy, ratio, near, far) {
         this.fovy = fovy;
         this.ratio = ratio;

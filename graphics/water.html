@@ -139,22 +139,33 @@ function myMouseDown(mouseEvent) {
     startX = (mouseEvent.clientX * 2 - gl.viewportWidth)/gl.viewportWidth;
     startY = (gl.viewportHeight - mouseEvent.clientY * 2)/gl.viewportHeight;
     mouseDown = true;
+    var eye = camera.getEye();
+    var near = camera.getNear();
+    var point = quat.fromValues(startX, startY, -1.0, 1.0);
+    quat.scale(point, point, near);
     
     var MVinverse = mat4.create();
-    var center = quat.fromValues(0.0, 0.0, 0.0, 1.0); 
   
-    mat4.multiply(center, targetMatrix, center);
-    mat4.multiply(center, camera.getMVMatrix(), center);
-    mat4.multiply(center, camera.getPMatrix(), center);
-    var z = Math.abs(center[3]);
-    quat.scale(center, center, 1/center[3]);
+    mat4.multiply(MVinverse, camera.getPMatrix(), camera.getMVMatrix());
+    mat4.invert(MVinverse, MVinverse);
+    mat4.multiply(point, MVinverse, point);
  
-    var distance = Math.sqrt( (center[0] - startX) * (center[0] - startX)
-                              +(center[1] - startY) * (center[1] - startY));
- 
+    var n = vec4.fromValues(point[0] - eye[0],
+                            point[1] - eye[1],
+                            point[2] - eye[2],
+                                            0);
+    
+    vec4.normalize(n, n);
+        
+    mat4.invert(MVinverse, targetMatrix);
+    mat4.multiply(n, MVinverse, n);
+    mat4.multiply(point, MVinverse, point);
   
-    var radius = 0.25/(z * Math.tan(camera.getFovy()/2));  
-    if (distance <= radius) {
+    var a = n[0] * n[0] + n[1] * n[1] + n[2] * n[2];
+    var b = 2 * (point[0] * n[0] + point[1] * n[1] + point[2] * n[2]);
+    var c = point[0] * point[0] + point[1] * point[1] + point[2] * point[2] - 0.25;
+ 
+    if ((b * b) > (4 * a * c)) {
         onTarget = true;
     }
 }
