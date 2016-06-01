@@ -8,7 +8,8 @@ function Sphere(segmentX, segmentY) {
     
     this.vertices = [];
     this.normals = [];
-    this.texture = [];
+    this.texture = false;
+
     this.pushStack = function (stack, x, y, z) {
         stack.push(x);
         stack.push(y);
@@ -50,37 +51,37 @@ function Sphere(segmentX, segmentY) {
                 u = 1.0 - w/segmentX;
                 v = 1.0 - h/segmentY;
                 this.pushStack(this.vertices, x, y, z);
-                this.pushStack(this.normals, 2 * x, 2 * y, 2 * z);
+                //this.pushStack(this.normals, 2 * x, 2 * y, 2 * z);
   
 	            //above point
                 u = 1.0 - w/segmentX;
                 v = 1.0 - (h + 1)/segmentY;
                 this.pushStack(this.vertices, x_above, y_above, z_above);
-                this.pushStack(this.normals, 2 * x_above, 2 * y_above, 2 * z_above);
+                //this.pushStack(this.normals, 2 * x_above, 2 * y_above, 2 * z_above);
                 
 	            //diagonal point
 	            u = 1.0 - (w + 1)/segmentX;
                 v = 1.0 - (h + 1)/segmentY;
                 this.pushStack(this.vertices, x_diagonal, y_above, z_diagonal);
-                this.pushStack(this.normals, 2 * x_diagonal, 2 * y_above, 2 * z_diagonal);
+                //this.pushStack(this.normals, 2 * x_diagonal, 2 * y_above, 2 * z_diagonal);
                 
                 //current
                 u = 1.0 - w/segmentX;
                 v = 1.0 - h/segmentY;
                 this.pushStack(this.vertices, x, y, z);
-                this.pushStack(this.normals, 2 * x, 2 * y, 2 * z);
+                //this.pushStack(this.normals, 2 * x, 2 * y, 2 * z);
                 
                 //diagonal point
 	            u = 1.0 - (w + 1)/segmentX;
                 v = 1.0 - (h + 1)/segmentY;
                 this.pushStack(this.vertices, x_diagonal, y_above, z_diagonal);
-                this.pushStack(this.normals, 2 * x_diagonal, 2 * y_above, 2 * z_diagonal); 
+                //this.pushStack(this.normals, 2 * x_diagonal, 2 * y_above, 2 * z_diagonal); 
                   
 	            //right point
                 u = 1.0 - (w + 1)/segmentX;
                 v = 1.0 - h/segmentY;
                 this.pushStack(this.vertices, x_right, y, z_right);
-                this.pushStack(this.normals, 2 * x_right, 2 * y, 2 * z_right);                
+                //this.pushStack(this.normals, 2 * x_right, 2 * y, 2 * z_right);                
                    
  
                 alpha += xunit;

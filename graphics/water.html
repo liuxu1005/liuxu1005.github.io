@@ -13,10 +13,15 @@
 
 var canvas;
 var gl;
+var lightPosition = vec3.fromValues(0.0, 5.0, 0.0);
 var matrixStack = []; 
-var targetMatrix = mat4.create();
+
 var moveMatrix = mat4.create();
 var rotation = mat4.create();
+
+var cubeMatrix = mat4.create();
+var sphereMatrix = mat4.create();
+var initSphereMatrix = mat4.create();
 
 var cube;
 var sphere;
@@ -58,6 +63,11 @@ function initProgram () {
 function initObjects() {
     cube = new Cube(40, 20);
     sphere = new Sphere(40, 20);
+    program.nodesType = gl.getUniformLocation(program, "nodes[0].type");
+    gl.uniform1i(program.nodesType, false, 0);   
+   
+    program.nodesType = gl.getUniformLocation(program, "nodes[1].type");
+    gl.uniform1i(program.nodesType, false, 1);
 }
  
 function drawObj(obj, curMatrix) {
@@ -67,29 +77,36 @@ function drawObj(obj, curMatrix) {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(obj.vertices), gl.STATIC_DRAW);
     program.v = gl.getAttribLocation(program, 'aVertexPosition');
     gl.enableVertexAttribArray(program.v);
-
-    
-    normalBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(obj.normals), gl.STATIC_DRAW);
-    program.n = gl.getAttribLocation(program, 'aVertexNormal');
-    gl.enableVertexAttribArray(program.n);
         
+
+    program.tMatrixUniform = gl.getUniformLocation(program, "uTMatrix");
+    gl.uniformMatrix4fv(program.tMatrixUniform, false, curMatrix);
+         
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    gl.vertexAttribPointer(program.v, 3, gl.FLOAT, false, 0, 0);
+   
+    gl.drawArrays(gl.TRIANGLES, 0, obj.vNum); 
+
+}
+
+function updateMatrix () {
     program.pMatrixUniform = gl.getUniformLocation(program, "uPMatrix");
     gl.uniformMatrix4fv(program.pMatrixUniform, false, camera.getPMatrix());
 
     program.mvMatrixUniform = gl.getUniformLocation(program, "uMVMatrix");
     gl.uniformMatrix4fv(program.mvMatrixUniform, false, camera.getMVMatrix());
+    
+    cubeMatrix = rotation;
+    mat4.multiply(sphereMatrix, rotation, moveMatrix);
+    mat4.multiply(sphereMatrix, sphereMatrix, initSphereMatrix);
+    
+  
+    program.nodesMatrix = gl.getUniformLocation(program, "nodes[0].mMatrix");
+    gl.uniformMatrix4fv(program.nodesMatrix, false, cubeMatrix);   
+   
+    program.nodesMatrix = gl.getUniformLocation(program, "nodes[1].mMatrix");
+    gl.uniformMatrix4fv(program.nodesMatrix, false, sphereMatrix);       
         
-    program.mvMatrixUniform = gl.getUniformLocation(program, "uTMatrix");
-    gl.uniformMatrix4fv(program.mvMatrixUniform, false, curMatrix);
-        
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.vertexAttribPointer(program.v, 3, gl.FLOAT, false, 0, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.vertexAttribPointer(program.n, 3, gl.FLOAT, false, 0, 0);    
-    gl.drawArrays(gl.TRIANGLES, 0, obj.vNum); 
-
 }
 
 function drawMyScene () {
@@ -99,23 +116,18 @@ function drawMyScene () {
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
-        curMatrix = mat4.create();
-        matrixStack.push(mat4.clone(curMatrix));
-        mat4.multiply(curMatrix, rotation, curMatrix);
-       
+        
+        program.nodeCount = gl.getUniformLocation(program, "nodeCount");
+        gl.uniform1i(program.nodeCount, false, 2);
+        
+        updateMatrix();
+ 
         //draw cube
-        drawObj(cube, curMatrix);
+        drawObj(cube, cubeMatrix);
         
         //draw sphere
+        drawObj(sphere, sphereMatrix);
  
-        matrixStack.push(mat4.clone(curMatrix));
-        mat4.multiply(curMatrix, curMatrix, moveMatrix);
-        mat4.translate(curMatrix, curMatrix, [0.5, -0.25, 0.0]);
-        mat4.scale(curMatrix, curMatrix, [0.5, 0.5, 0.5]);
-        targetMatrix = curMatrix;
-        drawObj(sphere, curMatrix);
-        curMatrix = matrixStack.pop();
-        curMatrix = matrixStack.pop();
        
 }
 
@@ -130,7 +142,17 @@ function main() {
 
     initWebgl();
     initProgram();
+    //initialize light
+    program.lightCount = gl.getUniformLocation(program, "lightCount");
+    gl.uniform1i(program.lightCount, false, 1); 
+    program.lightPosition = gl.getUniformLocation(program, "lightPosition");
+    gl.uniformMatrix4fv(program.lightPosition, false, lightPosition);
+    
     initObjects();
+       
+    mat4.translate(initSphereMatrix, initSphereMatrix, [0.5, -0.25, 0.0]);
+    mat4.scale(initSphereMatrix, initSphereMatrix, [0.5, 0.5, 0.5]);
+    
     drawMyScene();    
 }
 
@@ -145,7 +167,6 @@ function myMouseDown(mouseEvent) {
     quat.scale(point, point, near);
     
     var MVinverse = mat4.create();
-  
     mat4.multiply(MVinverse, camera.getPMatrix(), camera.getMVMatrix());
     mat4.invert(MVinverse, MVinverse);
     mat4.multiply(point, MVinverse, point);
@@ -157,7 +178,7 @@ function myMouseDown(mouseEvent) {
     
     vec4.normalize(n, n);
         
-    mat4.invert(MVinverse, targetMatrix);
+    mat4.invert(MVinverse, sphereMatrix);
     mat4.multiply(n, MVinverse, n);
     mat4.multiply(point, MVinverse, point);
   
@@ -254,7 +275,7 @@ function myMouseOut(mouseEvent) {
 <canvas id="water" width="500" height="500" onmousedown="myMouseDown(event)"    
         onmousemove="myMouseMove(event)" onmouseup="myMouseUp(event)" 
         onmouseout="myMouseOut(event)">
-Water
+Earth in Water
 </canvas>
 
 </body>

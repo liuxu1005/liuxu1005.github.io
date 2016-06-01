@@ -6,7 +6,8 @@ function Cube(segmentX, segmentY) {
     this.vNum;
     this.vertices = [];
     this.normals = [];
-    this.texture = [];
+    this.texture = false;
+
         
     this.pushStack = function (stack, x, y, z) {
         stack.push(x);
@@ -28,22 +29,22 @@ function Cube(segmentX, segmentY) {
             for (x = 0; x < segmentX; x++) {
                 var x_next = tmp + xunit;
                 this.pushStack(this.vertices, tmp, y_coor, 0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, 1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, 1.0);
                 
                 this.pushStack(this.vertices, x_next, y_coor, 0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, 1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, 1.0);
                 
                 this.pushStack(this.vertices, x_next, y_next, 0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, 1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, 1.0);
                 
                 this.pushStack(this.vertices, tmp, y_coor, 0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, 1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, 1.0);
                 
                 this.pushStack(this.vertices, x_next, y_next, 0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, 1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, 1.0);
                 
                 this.pushStack(this.vertices, tmp, y_next, 0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, 1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, 1.0);
                 tmp += xunit;
             }
             tmp = 0.5;
@@ -52,44 +53,44 @@ function Cube(segmentX, segmentY) {
                 var z_next = tmp - zunit;
                 
                 this.pushStack(this.vertices, 0.5 , y_coor, tmp); 
-                this.pushStack(this.normals, 1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, 1.0, 0.0, 0.0);
                 
                 this.pushStack(this.vertices, 0.5, y_coor, z_next); 
-                this.pushStack(this.normals, 1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, 1.0, 0.0, 0.0);
                 
                 this.pushStack(this.vertices, 0.5, y_next, z_next); 
-                this.pushStack(this.normals, 1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, 1.0, 0.0, 0.0);
                 
                 this.pushStack(this.vertices, 0.5 , y_coor, tmp); 
-                this.pushStack(this.normals, 1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, 1.0, 0.0, 0.0);
                 
                 this.pushStack(this.vertices, 0.5, y_next, z_next); 
-                this.pushStack(this.normals, 1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, 1.0, 0.0, 0.0);
                 
                 this.pushStack(this.vertices, 0.5, y_next, tmp); 
-                this.pushStack(this.normals, 1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, 1.0, 0.0, 0.0);
                 tmp -= zunit;
             }
             tmp = 0.5;
             for (x = 0; x < segmentX; x++) {
                 var x_next = tmp - xunit;
                 this.pushStack(this.vertices, tmp, y_coor, -0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, -1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, -1.0);
                 
                 this.pushStack(this.vertices, x_next, y_coor, -0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, -1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, -1.0);
                 
                 this.pushStack(this.vertices, x_next, y_next, -0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, -1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, -1.0);
                 
                 this.pushStack(this.vertices, tmp, y_coor, -0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, -1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, -1.0);
                 
                 this.pushStack(this.vertices, x_next, y_next, -0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, -1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, -1.0);
                 
                 this.pushStack(this.vertices, tmp, y_next, -0.5); 
-                this.pushStack(this.normals, 0.0, 0.0, -1.0);
+                //this.pushStack(this.normals, 0.0, 0.0, -1.0);
                 tmp -= xunit;
             }
             tmp = -0.5;
@@ -98,22 +99,22 @@ function Cube(segmentX, segmentY) {
                 var z_next = tmp + zunit;
                 
                 this.pushStack(this.vertices, -0.5 , y_coor, tmp); 
-                this.pushStack(this.normals, -1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, -1.0, 0.0, 0.0);
                 
                 this.pushStack(this.vertices, -0.5, y_coor, z_next); 
-                this.pushStack(this.normals, -1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, -1.0, 0.0, 0.0);
                 
                 this.pushStack(this.vertices, -0.5, y_next, z_next); 
-                this.pushStack(this.normals, -1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, -1.0, 0.0, 0.0);
                 
                 this.pushStack(this.vertices, -0.5 , y_coor, tmp); 
-                this.pushStack(this.normals, -1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, -1.0, 0.0, 0.0);
                 
                 this.pushStack(this.vertices, -0.5, y_next, z_next); 
-                this.pushStack(this.normals, -1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, -1.0, 0.0, 0.0);
                 
                 this.pushStack(this.vertices, -0.5, y_next, tmp); 
-                this.pushStack(this.normals, -1.0, 0.0, 0.0);
+                //this.pushStack(this.normals, -1.0, 0.0, 0.0);
                 tmp += zunit;
             }
             y_coor += yunit;
@@ -132,22 +133,22 @@ function Cube(segmentX, segmentY) {
                 var x_next = x_coor + xunit;
                 
                 this.pushStack(this.vertices, x_coor, 0.5, z_coor); 
-                this.pushStack(this.normals, 0.0, 1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, 1.0, 0.0);
                 
                 this.pushStack(this.vertices, x_next, 0.5, z_coor); 
-                this.pushStack(this.normals, 0.0, 1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, 1.0, 0.0);
                 
                 this.pushStack(this.vertices, x_next, 0.5, z_next); 
-                this.pushStack(this.normals, 0.0, 1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, 1.0, 0.0);
                 
                 this.pushStack(this.vertices, x_coor, 0.5, z_coor); 
-                this.pushStack(this.normals, 0.0, 1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, 1.0, 0.0);
                 
                 this.pushStack(this.vertices, x_next, 0.5, z_next); 
-                this.pushStack(this.normals, 0.0, 1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, 1.0, 0.0);
                 
                 this.pushStack(this.vertices, x_coor, 0.5, z_next); 
-                this.pushStack(this.normals, 0.0, 1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, 1.0, 0.0);
                 
                 x_coor += xunit;
             }
@@ -166,22 +167,22 @@ function Cube(segmentX, segmentY) {
                 var x_next = x_coor + xunit;
                 
                 this.pushStack(this.vertices, x_coor, -0.5, z_coor); 
-                this.pushStack(this.normals, 0.0, -1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, -1.0, 0.0);
                 
                 this.pushStack(this.vertices, x_next, -0.5, z_coor); 
-                this.pushStack(this.normals, 0.0, -1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, -1.0, 0.0);
                 
                 this.pushStack(this.vertices, x_next, -0.5, z_next); 
-                this.pushStack(this.normals, 0.0, -1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, -1.0, 0.0);
                 
                 this.pushStack(this.vertices, x_coor, -0.5, z_coor); 
-                this.pushStack(this.normals, 0.0, -1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, -1.0, 0.0);
                 
                 this.pushStack(this.vertices, x_next, -0.5, z_next); 
-                this.pushStack(this.normals, 0.0, -1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, -1.0, 0.0);
                 
                 this.pushStack(this.vertices, x_coor, -0.5, z_next); 
-                this.pushStack(this.normals, 0.0, -1.0, 0.0);
+                //this.pushStack(this.normals, 0.0, -1.0, 0.0);
                 
                 x_coor += xunit;
             }
