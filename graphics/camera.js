@@ -2,25 +2,21 @@
 
 function Camera() {
 
-    this.near = 0.1;
-    this.far = 100.0;
     this.eye = quat.fromValues(13.0, 13.0, 13.0, 1.0);
     this.focus = quat.fromValues(0.0, 0.0, 0.0, 1.0);
     this.up = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
-  
-    this.ratio = 1.0;
+    
     this.fovy = 0.1;
+    this.ratio = 1.0;
+    this.near = 0.1;
+    this.far = 100.0;
     
-
-    this.pMatrix = mat4.create(); 
-    mat4.perspective(this.pMatrix, this.fovy, this.ratio, this.near, this.far);
+    this.pMatrix = mat4.create();
     this.mvMatrix = mat4.create();
-    mat4.lookAt(this.mvMatrix, [this.eye[0], this.eye[1], this.eye[2]], 
-                         [this.focus[0], this.focus[1], this.focus[2]], 
-                         [this.up[0], this.up[1], this.up[2]]);
-    
+   
     this.getPMatrix = function () {
-        return this.pMatrix;
+        return mat4.perspective(this.pMatrix, this.fovy, this.ratio, 
+                                               this.near, this.far);
     }
     this.getFocus = function() {
         return this.focus;
@@ -30,8 +26,10 @@ function Camera() {
     }
    
     this.getMVMatrix = function () {
-         
-        return  this.mvMatrix;
+        return mat4.lookAt(this.mvMatrix, 
+                           [this.eye[0], this.eye[1], this.eye[2]], 
+                           [this.focus[0], this.focus[1], this.focus[2]], 
+                                   [this.up[0], this.up[1], this.up[2]]);
     }
  
     this.getEye = function () {
@@ -43,14 +41,17 @@ function Camera() {
     this.getFar = function () {
         return this.far;
     }
+    this.getRatio = function () {
+        return this.ratio;
+    }
+    
     this.setPerspective = function (fovy, ratio, near, far) {
         this.fovy = fovy;
         this.ratio = ratio;
         this.near = near;
         this.far = far;
-        mat4.identity(this.pMatrix);
-        mat4.perspective(this.pMatrix, this.fovy, this.ratio, 
-                                        this.near, this.far);
+       
+
     
     }
     
@@ -58,10 +59,34 @@ function Camera() {
         this.eye = eye;
         this.focus = focus;
         this.up = up;
-        mat4.identity(this.mvMatrix);
-        mat4.lookAt(this.mvMatrix, [this.eye[0], this.eye[1], this.eye[2]], 
-                             [this.focus[0], this.focus[1], this.focus[2]], 
-                                      [this.up[0], this.up[1], this.up[2]]);
+    
+    }
+    this.rotate = function (startX, startY, curX, curY) {
+    
+        var v1 = vec4.fromValues(curX - startX, curY - startY, 0.0, 0.0);   
+        var MVinverse = mat4.create();
+        
+        mat4.multiply(MVinverse, camera.getPMatrix(), camera.getMVMatrix());
+        mat4.invert(MVinverse, MVinverse);
+ 
+        mat4.multiply(v1, MVinverse, v1);
+        var eye = camera.getEye();
+        var focus = camera.getFocus();     
+        var v2 = vec3. fromValues(eye[0] - focus[0], 
+                                  eye[1] - focus[1], 
+                                  eye[2] - focus[2]);
+
+        var rad = Math.sqrt((startX - curX) * (startX - curX) 
+                         + (startY - curY) * (startY - curY));
+        var axis = vec3.fromValues(v1[1] * v2[2] - v2[1] * v1[2], 
+                                       v1[2] * v2[0] - v2[2] * v1[0],
+                                       v1[0] * v2[1] - v2[0] * v1[1]);  
+  
+        //vec3.normalize(axis, axis);
+        var tmp = mat4.create();  
+        mat4.rotate(tmp, tmp, rad, axis);
+        mat4.multiply(this.eye, tmp, this.eye); 
+        mat4.multiply(this.up, tmp, this.up);  
     
     }
     

@@ -16,15 +16,14 @@ var gl;
 var lightPosition = vec3.fromValues(0.0, 5.0, 0.0);
 var matrixStack = []; 
 
-var moveMatrix = mat4.create();
-var rotation = mat4.create();
-
 var cubeMatrix = mat4.create();
 var sphereMatrix = mat4.create();
-var initSphereMatrix = mat4.create();
 
 var cube;
 var sphere;
+var texture = [];
+var myimage = [];
+ 
  
 var vs = vShader();  
 var fs = fShader(); 
@@ -41,6 +40,15 @@ var onTarget = false;
 var startX = 0.0;
 var startY = 0.0;
 var camera = new Camera();   
+
+
+
+function initWebgl() {
+    canvas = document.getElementById('Earth in Water');
+    gl = canvas.getContext('webgl');
+    gl.viewportWidth = canvas.clientWidth;
+	gl.viewportHeight = canvas.clientHeight;
+}
 
 function initProgram () {
     //compile shader
@@ -61,15 +69,44 @@ function initProgram () {
 } 
 
 function initObjects() {
-    cube = new Cube(40, 20);
-    sphere = new Sphere(40, 20);
+    cube = new Cube(20, 20);
+    sphere = new Sphere(20, 20);
     program.nodesType = gl.getUniformLocation(program, "nodes[0].type");
-    gl.uniform1i(program.nodesType, false, 0);   
+    gl.uniform1i(program.nodesType, 0);   
    
     program.nodesType = gl.getUniformLocation(program, "nodes[1].type");
-    gl.uniform1i(program.nodesType, false, 1);
+    gl.uniform1i(program.nodesType, 1);
+    
+
 }
  
+function initTexture(imageName, textureID) {
+   var myTexture = gl.createTexture();
+    var image = new Image();
+	image.src = imageName;
+	 
+	gl.bindTexture(gl.TEXTURE_2D, myTexture);
+	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);  //this line flips the texture image upside down
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+	texture.push(myTexture);
+	myimage.push(image);
+	
+}
+
+function bindTexture(textureID, location) {
+        gl.activeTexture(gl.TEXTURE0 + textureID);
+        gl.bindTexture(gl.TEXTURE_2D, texture[textureID]);
+        program.sampler = gl.getUniformLocation(program, location);  
+        gl.uniform1i(program.sampler, textureID);
+}
+
+
 function drawObj(obj, curMatrix) {
 
     vertexBuffer = gl.createBuffer();
@@ -81,26 +118,36 @@ function drawObj(obj, curMatrix) {
 
     program.tMatrixUniform = gl.getUniformLocation(program, "uTMatrix");
     gl.uniformMatrix4fv(program.tMatrixUniform, false, curMatrix);
+    
+    program.objType = gl.getUniformLocation(program, "objType");
+    if (obj == cube) {
+ 
+        gl.uniform1i(program.objType, 0);
+    } 
+
+    if (obj == sphere) {
+   
+        gl.uniform1i(program.objType, 1);
+  
+    } 
+     
          
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.vertexAttribPointer(program.v, 3, gl.FLOAT, false, 0, 0);
+    
+ 
    
     gl.drawArrays(gl.TRIANGLES, 0, obj.vNum); 
 
 }
 
-function updateMatrix () {
+function loadMatrix () {
     program.pMatrixUniform = gl.getUniformLocation(program, "uPMatrix");
     gl.uniformMatrix4fv(program.pMatrixUniform, false, camera.getPMatrix());
 
     program.mvMatrixUniform = gl.getUniformLocation(program, "uMVMatrix");
     gl.uniformMatrix4fv(program.mvMatrixUniform, false, camera.getMVMatrix());
-    
-    cubeMatrix = rotation;
-    mat4.multiply(sphereMatrix, rotation, moveMatrix);
-    mat4.multiply(sphereMatrix, sphereMatrix, initSphereMatrix);
-    
-  
+     
     program.nodesMatrix = gl.getUniformLocation(program, "nodes[0].mMatrix");
     gl.uniformMatrix4fv(program.nodesMatrix, false, cubeMatrix);   
    
@@ -109,19 +156,23 @@ function updateMatrix () {
         
 }
 
+
 function drawMyScene () {
 
             
         gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.enable(gl.DEPTH_TEST);
-        
+        gl.disable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND);
+        //init light
         program.nodeCount = gl.getUniformLocation(program, "nodeCount");
-        gl.uniform1i(program.nodeCount, false, 2);
+        gl.uniform1i(program.nodeCount, 2);
         
-        updateMatrix();
- 
+        //upload projection matrix and texture
+        loadMatrix();
+        bindTexture(0, "image0");
+        bindTexture(1, "image1");
         //draw cube
         drawObj(cube, cubeMatrix);
         
@@ -131,12 +182,6 @@ function drawMyScene () {
        
 }
 
-function initWebgl() {
-    canvas = document.getElementById('water');
-    gl = canvas.getContext('webgl');
-    gl.viewportWidth = canvas.clientWidth;
-	gl.viewportHeight = canvas.clientHeight;
-}
 function main() {
 
 
@@ -144,14 +189,15 @@ function main() {
     initProgram();
     //initialize light
     program.lightCount = gl.getUniformLocation(program, "lightCount");
-    gl.uniform1i(program.lightCount, false, 1); 
+    gl.uniform1i(program.lightCount, 1); 
     program.lightPosition = gl.getUniformLocation(program, "lightPosition");
     gl.uniformMatrix4fv(program.lightPosition, false, lightPosition);
     
     initObjects();
-       
-    mat4.translate(initSphereMatrix, initSphereMatrix, [0.5, -0.25, 0.0]);
-    mat4.scale(initSphereMatrix, initSphereMatrix, [0.5, 0.5, 0.5]);
+    initTexture("jumbo.gif", 0);
+    initTexture("earth.jpg", 1); 
+    mat4.translate(sphereMatrix, sphereMatrix, [0.5, -0.25, 0.0]);
+    mat4.scale(sphereMatrix, sphereMatrix, [0.5, 0.5, 0.5]);
     
     drawMyScene();    
 }
@@ -161,6 +207,7 @@ function myMouseDown(mouseEvent) {
     startX = (mouseEvent.clientX * 2 - gl.viewportWidth)/gl.viewportWidth;
     startY = (gl.viewportHeight - mouseEvent.clientY * 2)/gl.viewportHeight;
     mouseDown = true;
+    
     var eye = camera.getEye();
     var near = camera.getNear();
     var point = quat.fromValues(startX, startY, -1.0, 1.0);
@@ -202,7 +249,7 @@ function myMouseMove(mouseEvent) {
                                  eye[1] - focus[1], 
                                  eye[2] - focus[2]);
 
-        var vtmp = vec4.fromValues(curY -startY, startX - curX, 0, 0.0);
+        var vtmp = vec4.fromValues(curY -startY, startX - curX, 0.0, 0.0);
         var MVinverse = mat4.create();
         mat4.multiply(MVinverse, camera.getPMatrix(), camera.getMVMatrix());
         mat4.invert(MVinverse, MVinverse);
@@ -212,49 +259,24 @@ function myMouseMove(mouseEvent) {
         var moveVector = vec3.fromValues(v1[1] * v2[2] - v2[1] * v1[2], 
                                          v1[2] * v2[0] - v2[2] * v1[0],
                                          v1[0] * v2[1] - v2[0] * v1[1]); 
-        mat4.invert(MVinverse, rotation);
-        var moveTmp = vec4.fromValues(moveVector[0], moveVector[1], moveVector[2], 0);
-        mat4.multiply(moveTmp, MVinverse, moveTmp);
-        moveVector = vec3.fromValues(moveTmp[0], moveTmp[1], moveTmp[2]);           
+        
         vec3.normalize(moveVector, moveVector);
         var mag = Math.sqrt( (curX - startX) * (curX - startX)
                   + (curY - startY) * (curY - startY));
        
         vec3.scale(moveVector, moveVector, mag);
-         
-        mat4.translate(moveMatrix, moveMatrix, moveVector);
-               
-        drawMyScene();
+        var moveMatrix = mat4.create();
+        mat4.fromTranslation(moveMatrix, moveVector);
+        mat4.multiply(sphereMatrix, moveMatrix, sphereMatrix);
+        
+        drawMyScene();       
     
     } else if (mouseDown) {
-        
-        var v2 = vec4.fromValues(curX - startX, curY - startY, 0.0, 0.0);   
-        var MVinverse = mat4.create();
-        
-        mat4.multiply(MVinverse, camera.getPMatrix(), camera.getMVMatrix());
-        mat4.invert(MVinverse, MVinverse);
- 
-        mat4.multiply(v2, MVinverse, v2);
-        var eye = camera.getEye();
-        var focus = camera.getFocus();     
-        var v1 = vec3. fromValues(eye[0] - focus[0], 
-                                  eye[1] - focus[1], 
-                                  eye[2] - focus[2]);
-
-        var rad = Math.sqrt((startX - curX) * (startX - curX) 
-                         + (startY - curY) * (startY - curY));
-        var axis = vec3.fromValues(v1[1] * v2[2] - v2[1] * v1[2], 
-                                       v1[2] * v2[0] - v2[2] * v1[0],
-                                       v1[0] * v2[1] - v2[0] * v1[1]);  
-  
-        vec3.normalize(axis, axis);
-        var tmp = mat4.create();  
-        mat4.rotate(tmp, tmp, rad, axis);
-        mat4.multiply(rotation, tmp, rotation);
-        
-        drawMyScene();
+    
+        camera.rotate(startX, startY, curX, curY);
+        drawMyScene();  
     }
-
+    
     startX = curX;
     startY = curY;         
 
@@ -272,7 +294,7 @@ function myMouseOut(mouseEvent) {
 
 </script>
 <body onload="main();">
-<canvas id="water" width="500" height="500" onmousedown="myMouseDown(event)"    
+<canvas id="Earth in Water" width="650" height="650" onmousedown="myMouseDown(event)"    
         onmousemove="myMouseMove(event)" onmouseup="myMouseUp(event)" 
         onmouseout="myMouseOut(event)">
 Earth in Water
