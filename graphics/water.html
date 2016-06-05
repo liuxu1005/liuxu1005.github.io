@@ -336,6 +336,9 @@ function animateMyScene() {
 	requestAnimationFrame(animateMyScene);   
 	drawScene();
 }
+document.ontouchstart = myMousedown;
+document.ontouchmove = myMouseMove;
+document.ontouchend = myMouseUp;
 
 function main() {
 
