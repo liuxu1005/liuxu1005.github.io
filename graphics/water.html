@@ -11,7 +11,8 @@
 <body onload="main()">
 <canvas id="Earth in Water" width="800" height="650" onmousedown="myMouseDown(event)"    
         onmousemove="myMouseMove(event)" onmouseup="myMouseUp(event)" 
-        onmouseout="myMouseOut(event)">
+        onmouseout="myMouseOut(event)" ontouchstart="myMouseDown(event)"
+        ontouchmove="myMouseMove(event)" ontouchend="myMouseUP(event)">
 Earth in Water
 </canvas>
 
@@ -336,9 +337,6 @@ function animateMyScene() {
 	requestAnimationFrame(animateMyScene);   
 	drawScene();
 }
-document.ontouchstart = myMousedown;
-document.ontouchmove = myMouseMove;
-document.ontouchend = myMouseUp;
 
 function main() {
 
