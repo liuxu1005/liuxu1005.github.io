@@ -9,10 +9,10 @@
 <script src="sphere.js"></script>
 </head>
 <body onload="main()">
-<canvas id="Earth in Water" width="800" height="650" onmousedown="myMouseDown(event)"    
-        onmousemove="myMouseMove(event)" onmouseup="myMouseUp(event)" 
-        onmouseout="myMouseOut(event)" ontouchstart="myMouseDown(event)"
-        ontouchmove="myMouseMove(event)" ontouchend="myMouseUP(event)">
+<canvas id="Earth in Water" width="800" height="650" onmousedown="mouseDown(event)"    
+        onmousemove="mouseMove(event)" onmouseup="mouseUp(event)" 
+        onmouseout="mouseOut(event)" ontouchstart="touchStart(event)"
+        ontouchmove="touchMove(event)" ontouchend="touchEnd(event)">
 Earth in Water
 </canvas>
 
@@ -246,10 +246,10 @@ function drawScene () {
 }
 
 
-function myMouseDown(mouseEvent) {
+function startDrag(px, py) {
  
-    startX = (mouseEvent.clientX * 2 - gl.viewportWidth)/gl.viewportWidth;
-    startY = (gl.viewportHeight - mouseEvent.clientY * 2)/gl.viewportHeight;
+    startX = (px * 2 - gl.viewportWidth)/gl.viewportWidth;
+    startY = (gl.viewportHeight - py * 2)/gl.viewportHeight;
     mouseDown = true;
     
     var eye = camera.getEye();
@@ -282,10 +282,19 @@ function myMouseDown(mouseEvent) {
         onTarget = true;
     }
 }
+function mouseDown(event) {
+    startDrag(event.pageX, event.pageY);
 
-function myMouseMove(mouseEvent) {
-    var curX = (mouseEvent.clientX * 2 - gl.viewportWidth)/gl.viewportWidth;
-    var curY = (gl.viewportHeight - mouseEvent.clientY * 2)/gl.viewportHeight;
+}
+
+function touchStart(event) {
+    startDrag(event.touches[0].pageX, event.touches[0].pageY);
+
+}
+
+function duringDrag(px, py) {
+    var curX = (px * 2 - gl.viewportWidth)/gl.viewportWidth;
+    var curY = (gl.viewportHeight - py * 2)/gl.viewportHeight;
 
     if (mouseDown && onTarget) {
         var eye = camera.getEye();
@@ -323,14 +332,27 @@ function myMouseMove(mouseEvent) {
     startY = curY;         
 
 }
-function myMouseUp(mouseEvent) {
+function mouseMove(event) {
+    duringDrag(event.pageX, event.pageY);
+    
+}
+
+function touchMove(event) {
+    duringDrag(event.touches[0].pageX, event.touches[0].pageY);
+}
+function stopDrag() {
     mouseDown = false;
     onTarget = false;
  
 }
-function myMouseOut(mouseEvent) {
-    mouseDown = false;
-    onTarget = false;
+function mouseUp(event) {
+    stopDrag();
+}
+function myMouseOut(event) {
+    stopDrag();
+}
+function touchEnd(event) {
+    stopDrag();
 }
 
 function animateMyScene() {
