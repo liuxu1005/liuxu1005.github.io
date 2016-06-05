@@ -7,13 +7,11 @@ function Cube(segmentX, segmentY) {
     this.vertices = [];
     this.normals = [];
     this.texture = false;
-
-        
+   
     this.pushStack = function (stack, x, y, z) {
         stack.push(x);
         stack.push(y);
-        stack.push(z);
-    
+        stack.push(z);  
     }
   
     this.initial = function (segmentX, segmentY) {

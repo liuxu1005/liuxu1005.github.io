@@ -64,17 +64,16 @@ function Camera() {
     this.rotate = function (startX, startY, curX, curY) {
     
         var v1 = vec4.fromValues(curX - startX, curY - startY, 0.0, 0.0);   
-        var MVinverse = mat4.create();
+        var iPMatrix = mat4.create();
         
-        mat4.multiply(MVinverse, camera.getPMatrix(), camera.getMVMatrix());
-        mat4.invert(MVinverse, MVinverse);
+        mat4.multiply(iPMatrix, camera.getPMatrix(), camera.getMVMatrix());
+        mat4.invert(iPMatrix, iPMatrix);
  
-        mat4.multiply(v1, MVinverse, v1);
-        var eye = camera.getEye();
-        var focus = camera.getFocus();     
-        var v2 = vec3. fromValues(eye[0] - focus[0], 
-                                  eye[1] - focus[1], 
-                                  eye[2] - focus[2]);
+        mat4.multiply(v1, iPMatrix, v1);
+       
+        var v2 = vec3. fromValues(this.eye[0] - this.focus[0], 
+                                  this.eye[1] - this.focus[1], 
+                                  this.eye[2] - this.focus[2]);
 
         var rad = Math.sqrt((startX - curX) * (startX - curX) 
                          + (startY - curY) * (startY - curY));
@@ -82,9 +81,9 @@ function Camera() {
                                        v1[2] * v2[0] - v2[2] * v1[0],
                                        v1[0] * v2[1] - v2[0] * v1[1]);  
   
-        //vec3.normalize(axis, axis);
-        var tmp = mat4.create();  
-        mat4.rotate(tmp, tmp, rad, axis);
+     
+        var tmp = mat4.create(); 
+        mat4.fromRotation(tmp, rad, axis); 
         mat4.multiply(this.eye, tmp, this.eye); 
         mat4.multiply(this.up, tmp, this.up);  
     
