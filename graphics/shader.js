@@ -23,7 +23,7 @@ function fShader() {
                 int texture;\
                 float roi;\
                 float reflection;\
-                mat4 mMatrix;\
+                mat4 mTransMatrix;\
                 mat4 mIMatrix;\
      };\
      struct Intersection {\
@@ -39,6 +39,7 @@ function fShader() {
      uniform int lightCount;\
      uniform vec4 lightPosition;\
      uniform int objCount;\
+     uniform int curType;\
      uniform float near;\
      uniform vec4 eye;\
      uniform obj  objs[2];\
@@ -50,10 +51,11 @@ function fShader() {
                                0.0));\
      }\
      vec4 viewToWorld(vec4 point) {\
-         vec2 ndc = vec2((point.x * 2.0)/viewPort.x - 1.0,\
-                         (point.y * 2.0)/viewPort.y - 1.0);\
-         vec4 clip = vec4(ndc, -1.0, 1.0);\
-         clip = clip * near;\
+         vec4 ndc = vec4((point.x * 2.0)/viewPort.x - 1.0,\
+                         (point.y * 2.0)/viewPort.y - 1.0,\
+                         2.0 * point.z - 1.0,\
+                         1.0);\
+         vec4 clip = ndc/point.w;\
          return uIPMatrix * clip;\
      }\
      float interCube(vec4 origin, vec4 direction) {\
@@ -210,7 +212,7 @@ function fShader() {
 	              + aPoint.y * aPoint.y\
 	              + aPoint.z * aPoint.z;\
 	    if (tmp < 0.25000001 && tmp > 0.24999999 ) {\
-	        vec4 n = aPoint;\
+	        vec4 n = vec4(aPoint.xyz, 0.0);\
 	        normalize(n);\
 	        return n;\
 	    } else {\
@@ -330,8 +332,26 @@ function fShader() {
      }\
      vec4 color(vec4 aPoint) {\
          vec4 origin = viewToWorld(aPoint);\
-         vec4 direction = castRay(origin);\
-         vec4 color = colorHelper(origin, direction, 3);\
+         vec4 objPosition, normal, color;\
+         vec2 curTcoord;\
+         if (curType == 0) {\
+             objPosition =objs[0].mIMatrix * origin;\
+             vec4 normal = calNormal(curType, objPosition);\
+             normal = objs[0].mTransMatrix * normal;\
+             curTcoord = calTcoord(curType, objPosition);\
+             color = texture2D(image0, curTcoord);\
+         }\
+         if (curType == 1) {\
+             objPosition =objs[1].mIMatrix * origin;\
+             vec4 normal = calNormal(curType, objPosition);\
+             normal = objs[1].mTransMatrix * normal;\
+             curTcoord = calTcoord(curType, objPosition);\
+             color = texture2D(image1, curTcoord);\
+         }\
+         vec4 viewNormal = vec4(eye.xyz - origin.xyz, 0.0);\
+         normalize(viewNormal);\
+         normalize(normal);\
+         float product = dot(viewNormal, normal);\
          return color;\
      }\
      void main(void) {\

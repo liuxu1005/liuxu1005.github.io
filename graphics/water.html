@@ -20,7 +20,7 @@ Earth in Water
 
 var canvas;
 var gl;
-var mylightPosition = vec4.fromValues(0.0, 5.0, 0.0, 1.0);
+var mylightPosition = vec4.fromValues(0.0, 20.0, 0.0, 1.0);
 var matrixStack = []; 
 
 var cubeMatrix;
@@ -32,6 +32,7 @@ var sphereVertexBuffer;
 var cube;
 var sphere;
 var texture = []; 
+
  
 var vs = vShader();  
 var fs = fShader(); 
@@ -125,10 +126,11 @@ function initObjects() {
 
 }
  
-function initTexture(imageName, textureID, location) {
+function initTexture(imageName, textureID) {
     var myTexture = gl.createTexture();
     var image = new Image();
     image.onload = function () {
+        image.onload = null;
     	gl.bindTexture(gl.TEXTURE_2D, myTexture);
 	    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true); 
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -140,7 +142,7 @@ function initTexture(imageName, textureID, location) {
     };
 	image.src = imageName;
     texture.push(myTexture);
-	
+
 }
 
 
@@ -160,6 +162,14 @@ function drawObj(obj, curMatrix) {
         
     program.tMatrixUniform = gl.getUniformLocation(program, "uTMatrix");
     gl.uniformMatrix4fv(program.tMatrixUniform, false, curMatrix);
+    if (obj == cube) {
+        program.objType = gl.getUniformLocation(program, "curType");
+        gl.uniform1i(program.objType, 0);
+    }
+    if (obj == sphere) {
+        program.objType = gl.getUniformLocation(program, "curType");
+        gl.uniform1i(program.objType, 1);
+    }
          
     gl.bindBuffer(gl.ARRAY_BUFFER, obj.vertexBuffer);
     gl.vertexAttribPointer(program.v, 3, gl.FLOAT, false, 0, 0);  
@@ -182,14 +192,24 @@ function loadParameters () {
     gl.uniformMatrix4fv(program.iMatrixUniform, false, tmp);
     
     var tmp1 = mat4.clone(cubeMatrix);
-    mat4.invert(tmp1, cubeMatrix);
+    mat4.invert(tmp1, tmp1);
     program.cubeMatrix = gl.getUniformLocation(program, "objs[0].mIMatrix");
-    gl.uniformMatrix4fv(program.cubeMatrix, false, tmp1);   
+    gl.uniformMatrix4fv(program.cubeMatrix, false, tmp1); 
+    
+    var tmpTran1 = mat4.create();
+    mat4.transpose(tmpTran1, tmp1);
+    program.cubeTransMatrix = gl.getUniformLocation(program, "objs[0].mTransMatrix");
+    gl.uniformMatrix4fv(program.cubeTransMatrix, false, tmpTran1);     
    
     var tmp2 = mat4.clone(sphereMatrix);
     mat4.invert(tmp2, tmp2);
     program.sphereMatrix = gl.getUniformLocation(program, "objs[1].mIMatrix");
     gl.uniformMatrix4fv(program.sphereMatrix, false, tmp2);
+    
+    var tmpTran2 = mat4.create();
+    mat4.transpose(tmpTran2, tmp2);
+    program.cubeTransMatrix = gl.getUniformLocation(program, "objs[1].mTransMatrix");
+    gl.uniformMatrix4fv(program.cubeTransMatrix, false, tmpTran2);  
     
     program.eye = gl.getUniformLocation(program, "eye");
     gl.uniform4fv(program.eye, camera.getEye());
@@ -211,12 +231,13 @@ function drawScene () {
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
 
- 
         //upload projection matrix and texture
         loadParameters();
+        bindTexture(0, "image0");
+        
         //draw cube
         drawObj(cube, cubeMatrix);
-        
+        bindTexture(1, "image1");
         //draw sphere
         drawObj(sphere, sphereMatrix);
  
@@ -312,7 +333,7 @@ function myMouseOut(mouseEvent) {
 }
 
 function animateMyScene() {
-	requestAnimationFrame(animateMyScene);  //javascript convention for animation
+	requestAnimationFrame(animateMyScene);   
 	drawScene();
 }
 
@@ -324,11 +345,10 @@ function main() {
     initLight(); 
     initTexture("jumbo.gif", 0);  
     initTexture("earth.jpg", 1);  
-    bindTexture(0, "image0");
-    bindTexture(1, "image1");
+    //bindTexture(0, "image0");
+    //bindTexture(1, "image1");
     initObjects();
 
-    
     animateMyScene();  
      
 }
