@@ -9,10 +9,9 @@
 <script src="sphere.js"></script>
 </head>
 <body onload="main()">
-<canvas id="Earth in Water" width="800" height="650" onmousedown="mouseDown(event)"    
+<canvas id="Earth in Water" width="800" height="650" onmousedown="mousedown(event)"    
         onmousemove="mouseMove(event)" onmouseup="mouseUp(event)" 
-        onmouseout="mouseOut(event)" ontouchstart="touchStart(event)"
-        ontouchmove="touchMove(event)" ontouchend="touchEnd(event)">
+        onmouseout="mouseOut(event)" >
 Earth in Water
 </canvas>
 
@@ -282,7 +281,8 @@ function startDrag(px, py) {
         onTarget = true;
     }
 }
-function mouseDown(event) {
+
+function mousedown(event) {
     startDrag(event.pageX, event.pageY);
 
 }
@@ -348,7 +348,7 @@ function stopDrag() {
 function mouseUp(event) {
     stopDrag();
 }
-function myMouseOut(event) {
+function mouseOut(event) {
     stopDrag();
 }
 function touchEnd(event) {
