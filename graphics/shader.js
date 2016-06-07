@@ -3,13 +3,13 @@ function vShader () {
 
     var vs =
     'precision highp float;\
-     attribute vec3 aVertexPosition;\
+     attribute vec2 aVertexPosition;\
      uniform mat4 uPMatrix;\
      uniform mat4 uMVMatrix;\
      uniform mat4 uTMatrix;\
      uniform vec2 viewPort;\
      void main(void) {\
-        gl_Position = uPMatrix * uMVMatrix * uTMatrix * vec4(aVertexPosition, 1.0);\
+        gl_Position = vec4(aVertexPosition, 0.0, 1.0);\
     }';
     
     return vs;
@@ -21,8 +21,12 @@ function fShader() {
      struct obj {\
                 int type;\
                 int texture;\
-                float roi;\
-                float reflection;\
+                float diffuse;\
+                float reflective;\
+                float shiness;\
+                float refrective;\
+                float ior;\
+                float blend;\
                 mat4 mTransMatrix;\
                 mat4 mIMatrix;\
      };\
@@ -39,10 +43,10 @@ function fShader() {
      uniform int lightCount;\
      uniform vec4 lightPosition;\
      uniform int objCount;\
-     uniform int curType;\
      uniform float near;\
      uniform vec4 eye;\
-     uniform obj  objs[2];\
+     uniform obj  objs[3];\
+     uniform int recursion;\
      \
      vec4 castRay(vec4 point) {\
          return normalize(vec4(point.x - eye.x,\
@@ -53,10 +57,35 @@ function fShader() {
      vec4 viewToWorld(vec4 point) {\
          vec4 ndc = vec4((point.x * 2.0)/viewPort.x - 1.0,\
                          (point.y * 2.0)/viewPort.y - 1.0,\
-                         2.0 * point.z - 1.0,\
+                         -1.0,\
                          1.0);\
-         vec4 clip = ndc/point.w;\
+         vec4 clip = ndc * near;\
          return uIPMatrix * clip;\
+     }\
+     float interPlane(vec4 origin, vec4 direction) {\
+         float x, z;\
+         float tmp = -origin.y/direction.y;\
+         if (tmp >= 0.0) {\
+            x = origin.x + tmp * direction.x;\
+            z = origin.z + tmp * direction.z;\
+            if (x <= 0.5 && x >= -0.5\
+                && z >= -0.5 && z <= 0.5) {\
+                return tmp;\
+            }\
+         }\
+         return -1.0;\
+     }\
+     vec4 planeNormal(vec4 aPoint) {\
+         if ( aPoint.y< 0.0001 && aPoint.y > -0.0001) {\
+             return vec4(0.0, 1.0, 0.0, 0.0);\
+         }\
+         return vec4(0.0,0.0,0.0,0.0);\
+     }\
+     vec2 planeTcoord(vec4 aPoint) {\
+        if (aPoint.y< 0.0001 && aPoint.y > -0.0001) {\
+            return vec2(0.5 - aPoint.x, 0.5 + aPoint.z);\
+        }\
+         return vec2(0.0,0.0);\
      }\
      float interCube(vec4 origin, vec4 direction) {\
          float distance = 100000000.0;\
@@ -109,7 +138,7 @@ function fShader() {
              }\
          }\
          /*check top*/\
-         tmp = (0.5 - origin.y)/direction.y;\
+         tmp = (0.2 - origin.y)/direction.y;\
          if (tmp >= 0.0) {\
             x = origin.x + tmp * direction.x;\
             z = origin.z + tmp * direction.z;\
@@ -143,7 +172,7 @@ function fShader() {
          if (aPoint.x> -0.5001 && aPoint.x < -0.4999) {\
              return vec4(-1.0, 0.0, 0.0, 0.0);\
          }\
-         if ( aPoint.y< 0.5001 && aPoint.y > 0.4999) {\
+         if ( aPoint.y< 0.2001 && aPoint.y > 0.1999) {\
              return vec4(0.0, 1.0, 0.0, 0.0);\
          }\
          if ( aPoint.y > -0.5001 && aPoint.y < -0.4999) {\
@@ -164,7 +193,7 @@ function fShader() {
         if (aPoint.x> -0.5001 && aPoint.x < -0.4999) {\
             return vec2(0.5 + aPoint.z, 0.5 + aPoint.y);\
         }\
-        if (aPoint.y< 0.5001 && aPoint.y > 0.4999) {\
+        if (aPoint.y< 0.2001 && aPoint.y > 0.1999) {\
             return vec2(0.5 - aPoint.x, 0.5 + aPoint.z);\
         }\
         if ( aPoint.y > -0.5001 && aPoint.y < -0.4999) {\
@@ -239,6 +268,9 @@ function fShader() {
          if (objType == 1) {\
              return interSphere(objOrigin, objDirection);\
          }\
+         if (objType == 2) {\
+             return interPlane(objOrigin, objDirection);\
+         }\
          return -1.0;\
      }\
      vec4 calNormal(int objType, vec4 aPoint) {\
@@ -248,6 +280,9 @@ function fShader() {
          if (objType == 1) {\
              return sphereNormal(aPoint);\
          }\
+         if (objType == 2) {\
+             return planeNormal(aPoint);\
+         }\
          return vec4(0.0, 0.0, 0.0, 0.0);\
      }\
      vec2 calTcoord(int objType, vec4 aPoint) {\
@@ -256,6 +291,9 @@ function fShader() {
          }\
          if (objType == 1) {\
              return sphereTcoord(aPoint);\
+         }\
+         if (objType == 2) {\
+             return planeTcoord(aPoint);\
          }\
          return vec2(0.0,0.0);\
      }\
@@ -273,6 +311,11 @@ function fShader() {
              target = 1;\
              distance = tmp;\
          }\
+         tmp = interDistance(objs[2].type, objs[2].mIMatrix, origin, direction);\
+         if (tmp > 0.0 && tmp < distance) {\
+             target = 2;\
+             distance = tmp;\
+         }\
          if (target >= 0 ) {\
              vec4 position = vec4(origin.x + distance * direction.x,\
                                   origin.y + distance * direction.y,\
@@ -284,13 +327,20 @@ function fShader() {
                  objPosition = objs[0].mIMatrix * position;\
                  tmpn = calNormal(objs[0].type, objPosition);\
                  tmptcoord = calTcoord(objs[0].type, objPosition);\
+                 return Intersection(target, position, tmpn, tmptcoord);\
              }\
              if(target == 1) {\
                  objPosition = objs[1].mIMatrix * position;\
                  tmpn = calNormal(objs[1].type, objPosition);\
                  tmptcoord = calTcoord(objs[1].type, objPosition);\
+                 return Intersection(target, position, tmpn, tmptcoord);\
              }\
-             return Intersection(target, position, tmpn, tmptcoord);\
+             if(target == 2) {\
+                 objPosition = objs[2].mIMatrix * position;\
+                 tmpn = calNormal(objs[2].type, objPosition);\
+                 tmptcoord = calTcoord(objs[2].type, objPosition);\
+                 return Intersection(target, position, tmpn, tmptcoord);\
+             }\
          } else {\
              return Intersection(-1,\
                                  vec4(0.0, 0.0, 0.0, 1.0),\
@@ -301,12 +351,11 @@ function fShader() {
      vec4 getObjColor(Intersection i) {\
         if (i.objID < 0) {return vec4(0.0, 0.0, 0.0, 0.0);}\
         if (i.objID == 0) {\
-            if (objs[0].texture == 0) {\
-                return texture2D(image0, i.tcoord);\
+            vec4 objPosition = objs[0].mIMatrix * i.position;\
+            if (objPosition.y > 0.2001) {\
+                return vec4(1.0, 1.0, 1.0, 0.1);\
             }\
-            if (objs[0].texture == 1) {\
-                return texture2D(image1, i.tcoord);\
-            }\
+            return vec4(0.4, 0.9, 1.0, 0.5);\
         };\
         if (i.objID == 1) {\
             if (objs[1].texture == 0) {\
@@ -316,42 +365,35 @@ function fShader() {
                 return texture2D(image1, i.tcoord);\
             }\
         };\
-        return vec4(0.3, 0.8, 0.6, 1.0);\
+        if (i.objID == 2) {\
+            if (objs[2].texture == 0) {\
+                return texture2D(image0, i.tcoord);\
+            }\
+            if (objs[2].texture == 1) {\
+                return texture2D(image1, i.tcoord);\
+            }\
+        };\
+        return vec4(0.0, 0.0, 0.0, 1.0);\
      }\
-     vec4 colorHelper(vec4 origin, vec4 direction, int recursion) {\
-         if (recursion <= 0) {return vec4(0.0, 0.0, 0.0, 0.0);}\
-         Intersection intersection = interSect(origin, direction);\
-         if (intersection.objID >=0) {\
+     vec4 colorHelper(Intersection intersection) {\
+         if (intersection.objID >= 0) {\
              vec4 tc = getObjColor(intersection);\
              vec4 light = normalize(lightPosition - intersection.position);\
-             float product = max(0.0, dot(light, intersection.normal));\
-             return vec4(tc.rgb, 1.0);\
+             return tc;\
          } else {\
-             return vec4(0.3, 0.8, 0.6, 1.0);\
+             return vec4(0.0, 0.0, 0.0, 1.0);\
          }\
      }\
      vec4 color(vec4 aPoint) {\
-         vec4 origin = viewToWorld(aPoint);\
-         vec4 objPosition, normal, color;\
-         vec2 curTcoord;\
-         if (curType == 0) {\
-             objPosition =objs[0].mIMatrix * origin;\
-             vec4 normal = calNormal(curType, objPosition);\
-             normal = objs[0].mTransMatrix * normal;\
-             curTcoord = calTcoord(curType, objPosition);\
-             color = texture2D(image0, curTcoord);\
+         vec4 color = vec4(0.0, 0.0, 0.0, 0.0);\
+         vec4 thePoint = viewToWorld(aPoint);\
+         vec4 direction = castRay(thePoint);\
+         for(int i = 0; i < 5; i++) {\
+            if (i >= 1) break;\
+            Intersection intersection = interSect(thePoint, direction);\
+            color = colorHelper(intersection);\
+            thePoint = intersection.position;\
          }\
-         if (curType == 1) {\
-             objPosition =objs[1].mIMatrix * origin;\
-             vec4 normal = calNormal(curType, objPosition);\
-             normal = objs[1].mTransMatrix * normal;\
-             curTcoord = calTcoord(curType, objPosition);\
-             color = texture2D(image1, curTcoord);\
-         }\
-         vec4 viewNormal = vec4(eye.xyz - origin.xyz, 0.0);\
-         normalize(viewNormal);\
-         normalize(normal);\
-         float product = dot(viewNormal, normal);\
          return color;\
      }\
      void main(void) {\

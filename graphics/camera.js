@@ -2,7 +2,7 @@
 
 function Camera() {
 
-    this.eye = quat.fromValues(13.0, 13.0, 13.0, 1.0);
+    this.eye = quat.fromValues(22.0, 13.0, 22.0, 1.0);
     this.focus = quat.fromValues(0.0, 0.0, 0.0, 1.0);
     this.up = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
     
