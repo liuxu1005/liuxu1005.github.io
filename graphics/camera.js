@@ -2,7 +2,7 @@
 
 function Camera() {
 
-    this.eye = quat.fromValues(22.0, 13.0, 22.0, 1.0);
+    this.eye = quat.fromValues(20.0, 13.0, 20.0, 1.0);
     this.focus = quat.fromValues(0.0, 0.0, 0.0, 1.0);
     this.up = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
     
@@ -10,6 +10,14 @@ function Camera() {
     this.ratio = 1.0;
     this.near = 0.1;
     this.far = 100.0;
+    
+    this.getDistance = function () { 
+        var v = quat.fromValues(this.focus[0] - this.eye[0],
+                                this.focus[1] - this.eye[1],
+                                this.focus[2] - this.eye[2],
+                                0.0);
+        return Math.sqrt(quat.sqrLen(v));
+    }
     
     this.pMatrix = mat4.create();
     this.mvMatrix = mat4.create();

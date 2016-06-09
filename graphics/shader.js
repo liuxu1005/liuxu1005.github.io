@@ -30,8 +30,16 @@ function fShader() {
                 mat4 mTransMatrix;\
                 mat4 mIMatrix;\
      };\
+     struct Ambient {\
+         float a;\
+         float d;\
+         float s;\
+     };\
      struct Intersection {\
         int objID;\
+        int level;\
+        float coeff;\
+        vec4 direction;\
         vec4 position;\
         vec4 normal;\
         vec2 tcoord;\
@@ -40,13 +48,15 @@ function fShader() {
      uniform sampler2D image1;\
      uniform mat4 uIPMatrix;\
      uniform vec2 viewPort;\
-     uniform int lightCount;\
-     uniform vec4 lightPosition;\
+     uniform int mylightCount;\
+     uniform vec4 mylightPosition;\
+     uniform vec4 mylightColor;\
      uniform int objCount;\
      uniform float near;\
      uniform vec4 eye;\
      uniform obj  objs[3];\
      uniform int recursion;\
+     Ambient ambient = Ambient(0.5, 0.5, 0.5);\
      \
      vec4 castRay(vec4 point) {\
          return normalize(vec4(point.x - eye.x,\
@@ -240,7 +250,7 @@ function fShader() {
         float tmp = aPoint.x * aPoint.x\
 	              + aPoint.y * aPoint.y\
 	              + aPoint.z * aPoint.z;\
-	    if (tmp < 0.25000001 && tmp > 0.24999999 ) {\
+	    if (tmp < 0.250001 && tmp > 0.249999 ) {\
 	        vec4 n = vec4(aPoint.xyz, 0.0);\
 	        normalize(n);\
 	        return n;\
@@ -297,24 +307,16 @@ function fShader() {
          }\
          return vec2(0.0,0.0);\
      }\
-     Intersection interSect(vec4 origin, vec4 direction) {\
+     Intersection interSect(vec4 origin, vec4 direction, float coeff) {\
          float distance = 100000000.0;\
          int target = -1;\
          float tmp = -1.0;\
-         tmp = interDistance(objs[0].type, objs[0].mIMatrix, origin, direction);\
-         if (tmp > 0.0 && tmp < distance) {\
-             target = 0;\
-             distance = tmp;\
-         }\
-         tmp = interDistance(objs[1].type, objs[1].mIMatrix, origin, direction);\
-         if (tmp > 0.0 && tmp < distance) {\
-             target = 1;\
-             distance = tmp;\
-         }\
-         tmp = interDistance(objs[2].type, objs[2].mIMatrix, origin, direction);\
-         if (tmp > 0.0 && tmp < distance) {\
-             target = 2;\
-             distance = tmp;\
+         for (int i = 0; i < 3; i++) {\
+             tmp = interDistance(objs[i].type, objs[i].mIMatrix, origin, direction);\
+             if (tmp > 0.0 && tmp < distance) {\
+                 target = i;\
+                 distance = tmp;\
+             }\
          }\
          if (target >= 0 ) {\
              vec4 position = vec4(origin.x + distance * direction.x,\
@@ -323,78 +325,179 @@ function fShader() {
                                                                1.0);\
              vec4 objPosition, tmpn;\
              vec2 tmptcoord;\
-             if (target == 0) {\
-                 objPosition = objs[0].mIMatrix * position;\
-                 tmpn = calNormal(objs[0].type, objPosition);\
-                 tmptcoord = calTcoord(objs[0].type, objPosition);\
-                 return Intersection(target, position, tmpn, tmptcoord);\
-             }\
-             if(target == 1) {\
-                 objPosition = objs[1].mIMatrix * position;\
-                 tmpn = calNormal(objs[1].type, objPosition);\
-                 tmptcoord = calTcoord(objs[1].type, objPosition);\
-                 return Intersection(target, position, tmpn, tmptcoord);\
-             }\
-             if(target == 2) {\
-                 objPosition = objs[2].mIMatrix * position;\
-                 tmpn = calNormal(objs[2].type, objPosition);\
-                 tmptcoord = calTcoord(objs[2].type, objPosition);\
-                 return Intersection(target, position, tmpn, tmptcoord);\
+             for (int k = 0; k < 3; k++) {\
+                 if (target == k) {\
+                     objPosition = objs[k].mIMatrix * position;\
+                     tmpn = normalize(objs[k].mTransMatrix * calNormal(objs[k].type, objPosition));\
+                     tmptcoord = calTcoord(objs[k].type, objPosition);\
+                     return Intersection(k, 6, coeff,\
+                                         direction, position, tmpn, tmptcoord);\
+                 }\
              }\
          } else {\
-             return Intersection(-1,\
+             return Intersection(-1, 6, coeff,\
+                                 vec4(0.0, 0.0, 0.0, 0.0),\
                                  vec4(0.0, 0.0, 0.0, 1.0),\
-                                 vec4(0.0, 0.0, 0.0, 1.0),\
+                                 vec4(0.0, 0.0, 0.0, 0.0),\
                                  vec2(0.0, 0.0));\
          }\
      }\
      vec4 getObjColor(Intersection i) {\
-        if (i.objID < 0) {return vec4(0.0, 0.0, 0.0, 0.0);}\
+        if(i.objID < 0) return vec4(0.0, 0.0, 0.0, 1.0);\
+        vec4 texture;\
+        float blend, shiness, od, os;\
         if (i.objID == 0) {\
             vec4 objPosition = objs[0].mIMatrix * i.position;\
             if (objPosition.y > 0.2001) {\
-                return vec4(1.0, 1.0, 1.0, 0.1);\
+                texture =  vec4(0.5, 0.4, 0.3, 0.0);\
+            } else {\
+                texture = vec4(0.4, 0.9, 1.0, 1.0);\
             }\
-            return vec4(0.4, 0.9, 1.0, 0.5);\
+            blend = objs[0].blend;\
+            shiness = objs[0].shiness;\
+            od = objs[0].diffuse;\
+            os = objs[0].reflective;\
         };\
         if (i.objID == 1) {\
             if (objs[1].texture == 0) {\
-                return texture2D(image0, i.tcoord);\
+                texture = texture2D(image0, i.tcoord);\
             }\
             if (objs[1].texture == 1) {\
-                return texture2D(image1, i.tcoord);\
+                texture = texture2D(image1, i.tcoord);\
             }\
+            blend = objs[1].blend;\
+            shiness = objs[1].shiness;\
+            od = objs[1].diffuse;\
+            os = objs[1].reflective;\
         };\
         if (i.objID == 2) {\
             if (objs[2].texture == 0) {\
-                return texture2D(image0, i.tcoord);\
+                texture = texture2D(image0, i.tcoord);\
             }\
             if (objs[2].texture == 1) {\
-                return texture2D(image1, i.tcoord);\
+                texture = texture2D(image1, i.tcoord);\
             }\
+            blend = objs[2].blend;\
+            shiness = objs[1].shiness;\
+            od = objs[1].diffuse;\
+            os = objs[1].reflective;\
         };\
-        return vec4(0.0, 0.0, 0.0, 1.0);\
+        \
+        vec4 lightV = (mylightPosition - i.position);\
+        lightV = normalize(lightV);\
+        vec4 reflectV, viewV;\
+        float dotD, dotS, specular;\
+        vec4 tmpPosition = i.position + 0.0001 * lightV;\
+        Intersection tmpi = interSect(tmpPosition, lightV, 0.0);\
+        if (tmpi.objID < 0) {\
+            reflectV = reflect(lightV, i.normal);\
+            reflectV = normalize(reflectV);\
+            viewV = eye - i.position;\
+            viewV = normalize(viewV);\
+            dotD = max(0.0, dot(lightV, i.normal));\
+            dotS = max(0.0, dot(viewV, reflectV));\
+            if (dotS <= 0.0) {\
+                specular = 0.0;\
+            } else {\
+                specular = pow(dotS, shiness);\
+            }\
+        } else {\
+            dotD = 0.0;\
+            specular = 0.0;\
+        }\
+        vec4 color = blend * texture\
+                     + (1.0 - blend)\
+                     * (dotD * mylightColor * od * ambient.d\
+                     + specular * mylightColor * os * ambient.s);\
+        return color;\
      }\
-     vec4 colorHelper(Intersection intersection) {\
-         if (intersection.objID >= 0) {\
-             vec4 tc = getObjColor(intersection);\
-             vec4 light = normalize(lightPosition - intersection.position);\
-             return tc;\
-         } else {\
-             return vec4(0.0, 0.0, 0.0, 1.0);\
+     vec4 colorHelper(Intersection intersections[16]) {\
+             vec4 color = vec4(0.0, 0.0, 0.0, 0.0);\
+             for (int i = 0; i < 16; i++) {\
+                 if (intersections[i].level > recursion) break;\
+                 if (intersections[i].objID < 0) continue;\
+                 color = color + intersections[i].coeff * getObjColor(intersections[i]);\
+             }\
+             return vec4(color.rgb, 1.0);\
+     }\
+     bool testInside(int objID, vec4 aPoint) {\
+         if (objID == 0) {\
+             vec4 thePoint = objs[0].mIMatrix * aPoint;\
+             if (thePoint.x < 0.5 && thePoint.x > -0.5\
+                 && thePoint.y < 0.5 && thePoint.y > -0.5\
+                 && thePoint.z < 0.5 && thePoint.z > -0.5)\
+                 { return true;}\
          }\
+         return false;\
      }\
      vec4 color(vec4 aPoint) {\
-         vec4 color = vec4(0.0, 0.0, 0.0, 0.0);\
+         Intersection intersections[16];\
+         for(int i = 0; i < 16; i++) {\
+             intersections[i].objID = -1;\
+             intersections[i].level = 6;\
+         }\
          vec4 thePoint = viewToWorld(aPoint);\
          vec4 direction = castRay(thePoint);\
-         for(int i = 0; i < 5; i++) {\
-            if (i >= 1) break;\
-            Intersection intersection = interSect(thePoint, direction);\
-            color = colorHelper(intersection);\
-            thePoint = intersection.position;\
+         Intersection intersection = interSect(thePoint, direction, 1.0);\
+         if (intersection.objID >=0) {\
+             intersection.level = 0;\
+             intersections[0] = intersection;\
+         } else{\
+             return vec4(0.0, 0.0, 0.0, 1.0);\
          }\
-         return color;\
+         int top = 1;\
+         for(int i = 0; i < 16; i++) {\
+            if (intersections[i].level >= recursion) break;\
+            direction = reflect(intersections[i].direction, intersections[i].normal);\
+            thePoint = intersections[i].position + 0.0001 * direction;\
+            float tmpBlend, tmpRef, tmpRefr = -1.0 , ior;\
+            mat4 tmpIM;\
+            for (int g = 0; g < 3; g++) {\
+                if (g == intersections[i].objID) {\
+                    tmpBlend = objs[g].blend;\
+                    tmpRef = objs[g].reflective;\
+                    tmpRefr = objs[g].refrective;\
+                    ior = objs[g].ior;\
+                    tmpIM = objs[g].mIMatrix;\
+                }\
+            }\
+            intersection = interSect(thePoint, direction,\
+                           intersections[i].coeff * tmpRef * tmpBlend);\
+            intersection.level = intersections[i].level + 1;\
+            Intersection intersection1;\
+            vec4 refreV;\
+            bool transparent = false;\
+            if (tmpRefr > 0.0) {\
+                vec4 testPosition = intersections[i].position\
+                                    + 0.0001 * intersections[i].direction;\
+                bool inside = testInside(intersections[i].objID, testPosition);\
+                vec4 tmpNormal = intersections[i].normal;\
+                if (!inside) {\
+                    tmpRefr = 1.0/tmpRefr;\
+                    tmpNormal = - tmpNormal;\
+                }\
+                refreV = normalize(refract(intersections[i].direction,\
+                                           tmpNormal, tmpRefr));\
+                thePoint = intersections[i].position + 0.0001 * refreV;\
+                intersection1 = interSect(thePoint, refreV,\
+                           intersections[i].coeff * tmpRefr * tmpBlend);\
+                intersection1.level = intersections[i].level + 1;\
+                transparent = true;\
+            }\
+            for (int j = 0; j < 16; j++) {\
+                if ( j == top) {\
+                    intersections[j] = intersection;\
+                    if(transparent) {\
+                        intersections[j + 1] = intersection1;\
+                    }\
+                }\
+            }\
+            if (transparent) {\
+                top = top + 1;\
+            }\
+            top = top + 1;\
+         }\
+         return colorHelper(intersections);\
      }\
      void main(void) {\
          gl_FragColor = color(gl_FragCoord);\

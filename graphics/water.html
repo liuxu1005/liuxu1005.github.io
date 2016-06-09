@@ -6,7 +6,7 @@
 <script src="shader.js"></script>
 <script src="camera.js"></script>
 </head>
-<body onload="main()" style="background-color:#008000">
+<body onload="main()" style="background-color:#000000">
 <canvas id="Earth in Water" width="650" height="650"
         style="position:absolute; top:0px; left:0px"
         onmousedown="mouseDown(event)"    
@@ -21,7 +21,8 @@ Earth in Water
 
 var canvas;
 var gl;
-var mylightPosition = vec4.fromValues(0.0, 20.0, 0.0, 1.0);
+var mylightPosition = vec4.fromValues(0.0, 40.0, 0.0, 1.0);
+var mylightColor = vec4.fromValues(0.5, 0.8, 0.8, 1.0);
 var matrixStack = []; 
 
 var cubeMatrix;
@@ -78,10 +79,15 @@ function initProgram () {
 } 
 
 function initLight() {
-    program.lightCount = gl.getUniformLocation(program, "lightCount");
-    gl.uniform1i(program.lightCount, 1); 
-    program.lightPosition = gl.getUniformLocation(program, "lightPosition");
-    gl.uniform4fv(program.lightPosition, mylightPosition);
+    var tmp;
+    tmp = gl.getUniformLocation(program, "mylightCount");
+    gl.uniform1i(tmp, 1); 
+    
+    tmp = gl.getUniformLocation(program, "mylightPosition");
+    gl.uniform4fv(tmp, mylightPosition);
+    
+    tmp = gl.getUniformLocation(program, "mylightColor");
+    gl.uniform4fv(tmp, mylightColor);
 }
 
 function initScene() {
@@ -90,8 +96,6 @@ function initScene() {
     var translation = mat4.create(), 
         scaling = mat4.create();
     
- 
-    
     planeMatrix = mat4.create();
     mat4.translate(planeMatrix, planeMatrix, [0.0, -0.51, 0.0]);
     mat4.scale(planeMatrix, planeMatrix, [4.0, 1.0, 4.0]);
@@ -99,83 +103,87 @@ function initScene() {
     cubeMatrix = mat4.create();
     mat4.translate(cubeMatrix, cubeMatrix, [0.0, -0.1, 0.0]);
     mat4.scale(cubeMatrix, cubeMatrix, [1.2, 0.8, 1.2]);
+    
     sphereMatrix = mat4.create();
     mat4.fromTranslation(translation, [0.8, -0.25, 0.0]);
-    mat4.fromScaling(scaling, [0.2, 0.2, 0.2]);
+    mat4.fromScaling(scaling, [0.5, 0.5, 0.5]);
     mat4.multiply(sphereMatrix, translation, scaling);
     
-        
-    program.objType1 = gl.getUniformLocation(program, "objs[0].type");
-    gl.uniform1i(program.objType1, 0);  
+    var tmp;  
+    tmp = gl.getUniformLocation(program, "objs[0].type");
+    gl.uniform1i(tmp, 0);  
     
-    program.objTexture1 = gl.getUniformLocation(program, "objs[0].texture");
-    gl.uniform1i(program.objTexture1, 0);
+    tmp = gl.getUniformLocation(program, "objs[0].texture");
+    gl.uniform1i(tmp, -1);
      
-    program.obj1D = gl.getUniformLocation(program, "objs[0].diffuse");
-    gl.uniform1f(program.obj1D, 1.0);
+    tmp = gl.getUniformLocation(program, "objs[0].diffuse");
+    gl.uniform1f(tmp, 0.0);
     
-    program.obj1Rl = gl.getUniformLocation(program, "objs[0].reflective");
-    gl.uniform1f(program.obj1Rl, 0.2);
+    tmp = gl.getUniformLocation(program, "objs[0].reflective");
+    gl.uniform1f(tmp, 0.1);
     
-    program.obj1S = gl.getUniformLocation(program, "objs[0].shiness");
-    gl.uniform1f(program.obj1S, 20.0);
+    tmp = gl.getUniformLocation(program, "objs[0].shiness");
+    gl.uniform1f(tmp, 30);
     
-    program.obj1Rr = gl.getUniformLocation(program, "objs[0].refrective");
-    gl.uniform1f(program.obj1Rr, 0.8);
+    tmp = gl.getUniformLocation(program, "objs[0].refrective");
+    gl.uniform1f(tmp, 0.99);
     
-    program.obj1Ior = gl.getUniformLocation(program, "objs[0].ior");
-    gl.uniform1f(program.obj1Ior, 1.33);
+    tmp = gl.getUniformLocation(program, "objs[0].ior");
+    gl.uniform1f(tmp, 1.33);
     
-    program.obj1B = gl.getUniformLocation(program, "objs[0].ior");
-    gl.uniform1f(program.obj1B, 0.5);
+    tmp = gl.getUniformLocation(program, "objs[0].blend");
+    gl.uniform1f(tmp, 0.5);
     
-    program.objType2 = gl.getUniformLocation(program, "objs[1].type");
-    gl.uniform1i(program.objType2, 1);
+    tmp = gl.getUniformLocation(program, "objs[1].type");
+    gl.uniform1i(tmp, 1);
     
-    program.objTexture2 = gl.getUniformLocation(program, "objs[1].texture");
-    gl.uniform1i(program.objTexture2, 1);
+    tmp = gl.getUniformLocation(program, "objs[1].texture");
+    gl.uniform1i(tmp, 1);
     
-    program.obj2D = gl.getUniformLocation(program, "objs[1].diffuse");
-    gl.uniform1f(program.obj2D, 1.0);
+    tmp = gl.getUniformLocation(program, "objs[1].diffuse");
+    gl.uniform1f(tmp, 0.1);
     
-    program.obj2Rl = gl.getUniformLocation(program, "objs[1].reflective");
-    gl.uniform1f(program.obj2Rl, 0.9);
+    tmp = gl.getUniformLocation(program, "objs[1].reflective");
+    gl.uniform1f(tmp, 0.95);
     
-    program.obj2S = gl.getUniformLocation(program, "objs[1].shiness");
-    gl.uniform1f(program.obj2S, 1.0);
+    tmp = gl.getUniformLocation(program, "objs[1].shiness");
+    gl.uniform1f(tmp, 10);
     
-    program.obj2Rr = gl.getUniformLocation(program, "objs[1].refrective");
-    gl.uniform1f(program.obj2Rr, 0.0);
+    tmp = gl.getUniformLocation(program, "objs[1].refrective");
+    gl.uniform1f(tmp, 0.0);
     
-    program.obj2Ior = gl.getUniformLocation(program, "objs[1].ior");
-    gl.uniform1f(program.obj2Ior, 1.0);
+    tmp = gl.getUniformLocation(program, "objs[1].ior");
+    gl.uniform1f(tmp, 1.0);
     
-    program.obj2B = gl.getUniformLocation(program, "objs[1].ior");
-    gl.uniform1f(program.obj2B, 0.5);
+    tmp = gl.getUniformLocation(program, "objs[1].blend");
+    gl.uniform1f(tmp, 0.5);
     
-    program.objType3 = gl.getUniformLocation(program, "objs[2].type");
-    gl.uniform1i(program.objType3, 2);
+    tmp = gl.getUniformLocation(program, "objs[2].type");
+    gl.uniform1i(tmp, 2);
 
-    program.objTexture3 = gl.getUniformLocation(program, "objs[2].texture");
-    gl.uniform1i(program.objTexture3, 0);
+    tmp = gl.getUniformLocation(program, "objs[2].texture");
+    gl.uniform1i(tmp, 0);
         
-    program.obj3D = gl.getUniformLocation(program, "objs[1].diffuse");
-    gl.uniform1f(program.obj3D, 1.0);
+    tmp = gl.getUniformLocation(program, "objs[2].diffuse");
+    gl.uniform1f(tmp, 0.5);
     
-    program.obj3Rl = gl.getUniformLocation(program, "objs[1].reflective");
-    gl.uniform1f(program.obj3Rl, 0.9);
+    tmp = gl.getUniformLocation(program, "objs[2].reflective");
+    gl.uniform1f(tmp, 0.1);
     
-    program.obj3S = gl.getUniformLocation(program, "objs[1].shiness");
-    gl.uniform1f(program.obj3S, 1.0);
+    tmp = gl.getUniformLocation(program, "objs[2].shiness");
+    gl.uniform1f(tmp, 20.0);
     
-    program.obj3Rr = gl.getUniformLocation(program, "objs[1].refrective");
-    gl.uniform1f(program.obj3Rr, 0.0);
+    tmp = gl.getUniformLocation(program, "objs[2].refrective");
+    gl.uniform1f(tmp, 0.0);
     
-    program.obj3Ior = gl.getUniformLocation(program, "objs[1].ior");
-    gl.uniform1f(program.obj3Ior, 1.0);
+    tmp = gl.getUniformLocation(program, "objs[2].ior");
+    gl.uniform1f(tmp, 1.0);
     
-    program.obj3B = gl.getUniformLocation(program, "objs[1].ior");
-    gl.uniform1f(program.obj3B, 0.5);
+    tmp = gl.getUniformLocation(program, "objs[2].blend");
+    gl.uniform1f(tmp, 0.8);
+    
+    tmp = gl.getUniformLocation(program, "recursion");
+    gl.uniform1i(tmp, 4);
     
     //load vertices
     vertexBuffer = gl.createBuffer();
@@ -230,35 +238,35 @@ function loadParameters () {
     program.iMatrixUniform = gl.getUniformLocation(program, "uIPMatrix");
     gl.uniformMatrix4fv(program.iMatrixUniform, false, tmp);
     
-    var tmp1 = mat4.clone(cubeMatrix);
-    mat4.invert(tmp1, tmp1);
+    tmp = mat4.clone(cubeMatrix);
+    mat4.invert(tmp, tmp);
     program.cubeMatrix = gl.getUniformLocation(program, "objs[0].mIMatrix");
-    gl.uniformMatrix4fv(program.cubeMatrix, false, tmp1); 
+    gl.uniformMatrix4fv(program.cubeMatrix, false, tmp); 
     
-    var tmpTran1 = mat4.create();
-    mat4.transpose(tmpTran1, tmp1);
+    var tmpTran = mat4.create();
+    mat4.transpose(tmpTran, tmp);
     program.cubeTransMatrix = gl.getUniformLocation(program, "objs[0].mTransMatrix");
-    gl.uniformMatrix4fv(program.cubeTransMatrix, false, tmpTran1);     
+    gl.uniformMatrix4fv(program.cubeTransMatrix, false, tmpTran);     
    
-    var tmp2 = mat4.clone(sphereMatrix);
-    mat4.invert(tmp2, tmp2);
+    tmp = mat4.clone(sphereMatrix);
+    mat4.invert(tmp, tmp);
     program.sphereMatrix = gl.getUniformLocation(program, "objs[1].mIMatrix");
-    gl.uniformMatrix4fv(program.sphereMatrix, false, tmp2);
+    gl.uniformMatrix4fv(program.sphereMatrix, false, tmp);
     
-    var tmpTran2 = mat4.create();
-    mat4.transpose(tmpTran2, tmp2);
+    tmpTran = mat4.create();
+    mat4.transpose(tmpTran, tmp);
     program.cubeTransMatrix = gl.getUniformLocation(program, "objs[1].mTransMatrix");
-    gl.uniformMatrix4fv(program.cubeTransMatrix, false, tmpTran2);  
+    gl.uniformMatrix4fv(program.cubeTransMatrix, false, tmpTran);  
     
-    var tmp3 = mat4.clone(planeMatrix);
-    mat4.invert(tmp3, tmp3);
+    tmp = mat4.clone(planeMatrix);
+    mat4.invert(tmp, tmp);
     program.planeMatrix = gl.getUniformLocation(program, "objs[2].mIMatrix");
-    gl.uniformMatrix4fv(program.planeMatrix, false, tmp3);
+    gl.uniformMatrix4fv(program.planeMatrix, false, tmp);
     
-    var tmpTran3 = mat4.create();
-    mat4.transpose(tmpTran3, tmp3);
+    tmpTran = mat4.create();
+    mat4.transpose(tmpTran, tmp);
     program.planeTransMatrix = gl.getUniformLocation(program, "objs[2].mTransMatrix");
-    gl.uniformMatrix4fv(program.planeTransMatrix, false, tmpTran3); 
+    gl.uniformMatrix4fv(program.planeTransMatrix, false, tmpTran); 
     
     program.eye = gl.getUniformLocation(program, "eye");
     gl.uniform4fv(program.eye, camera.getEye());
@@ -372,7 +380,8 @@ function duringDrag(px, py) {
                                          v1[0] * v2[1] - v2[0] * v1[1]); 
         
         vec3.normalize(moveVector, moveVector);
-        var mag = 8 * Math.sqrt( (curX - startX) * (curX - startX)
+        
+        var mag = (camera.getDistance()/8)* Math.sqrt( (curX - startX) * (curX - startX)
                   + (curY - startY) * (curY - startY));
        
         vec3.scale(moveVector, moveVector, mag);
@@ -421,11 +430,11 @@ function main() {
 
     initWebgl();
     initProgram();
-    initLight(); 
-    initTexture("jumbo.gif", 0);  
+    initLight();
+    initTexture("tiles.jpg", 0);  
     initTexture("earth.jpg", 1);  
     initScene();
-    
+
     animateMyScene();  
      
 }
