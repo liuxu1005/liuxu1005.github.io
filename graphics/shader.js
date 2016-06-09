@@ -490,6 +490,8 @@ function fShader() {
                     if(transparent) {\
                         intersections[j + 1] = intersection1;\
                     }\
+                } else if (j > top) {\
+                    break;\
                 }\
             }\
             if (transparent) {\
