@@ -39,6 +39,7 @@ function fShader() {
         int objID;\
         int level;\
         float coeff;\
+        vec4 origin;\
         vec4 direction;\
         vec4 position;\
         vec4 normal;\
@@ -250,10 +251,9 @@ function fShader() {
         float tmp = aPoint.x * aPoint.x\
 	              + aPoint.y * aPoint.y\
 	              + aPoint.z * aPoint.z;\
-	    if (tmp < 0.250001 && tmp > 0.249999 ) {\
+	    if (tmp < 0.25000001 && tmp > 0.24999999 ) {\
 	        vec4 n = vec4(aPoint.xyz, 0.0);\
-	        normalize(n);\
-	        return n;\
+	        return normalize(n);\
 	    } else {\
 	        return  vec4(0.0, 0.0, 0.0, 0.0);\
 	    }\
@@ -330,12 +330,13 @@ function fShader() {
                      objPosition = objs[k].mIMatrix * position;\
                      tmpn = normalize(objs[k].mTransMatrix * calNormal(objs[k].type, objPosition));\
                      tmptcoord = calTcoord(objs[k].type, objPosition);\
-                     return Intersection(k, 6, coeff,\
+                     return Intersection(k, 6, coeff, origin,\
                                          direction, position, tmpn, tmptcoord);\
                  }\
              }\
          } else {\
              return Intersection(-1, 6, coeff,\
+                                 vec4(0.0, 0.0, 0.0, 1.0),\
                                  vec4(0.0, 0.0, 0.0, 0.0),\
                                  vec4(0.0, 0.0, 0.0, 1.0),\
                                  vec4(0.0, 0.0, 0.0, 0.0),\
@@ -378,9 +379,9 @@ function fShader() {
                 texture = texture2D(image1, i.tcoord);\
             }\
             blend = objs[2].blend;\
-            shiness = objs[1].shiness;\
-            od = objs[1].diffuse;\
-            os = objs[1].reflective;\
+            shiness = objs[2].shiness;\
+            od = objs[2].diffuse;\
+            os = objs[2].reflective;\
         };\
         \
         vec4 lightV = (mylightPosition - i.position);\
@@ -390,9 +391,9 @@ function fShader() {
         vec4 tmpPosition = i.position + 0.0001 * lightV;\
         Intersection tmpi = interSect(tmpPosition, lightV, 0.0);\
         if (tmpi.objID < 0) {\
-            reflectV = reflect(lightV, i.normal);\
+            reflectV = reflect(-lightV, i.normal);\
             reflectV = normalize(reflectV);\
-            viewV = eye - i.position;\
+            viewV = i.origin - i.position;\
             viewV = normalize(viewV);\
             dotD = max(0.0, dot(lightV, i.normal));\
             dotS = max(0.0, dot(viewV, reflectV));\
@@ -411,9 +412,12 @@ function fShader() {
                      + specular * mylightColor * os * ambient.s);\
         return color;\
      }\
-     vec4 colorHelper(Intersection intersections[16]) {\
+     vec4 colorHelper(Intersection intersections[8]) {\
              vec4 color = vec4(0.0, 0.0, 0.0, 0.0);\
-             for (int i = 0; i < 16; i++) {\
+             if (intersections[0].objID == 1\
+                  && intersections[1].objID < 0)\
+                  return vec4(1.0, 0.0, 0.0, 1.0);\
+             for (int i = 0; i < 8; i++) {\
                  if (intersections[i].level > recursion) break;\
                  if (intersections[i].objID < 0) continue;\
                  color = color + intersections[i].coeff * getObjColor(intersections[i]);\
@@ -421,18 +425,24 @@ function fShader() {
              return vec4(color.rgb, 1.0);\
      }\
      bool testInside(int objID, vec4 aPoint) {\
+         vec4 thePoint;\
          if (objID == 0) {\
-             vec4 thePoint = objs[0].mIMatrix * aPoint;\
+             thePoint = objs[0].mIMatrix * aPoint;\
              if (thePoint.x < 0.5 && thePoint.x > -0.5\
                  && thePoint.y < 0.5 && thePoint.y > -0.5\
                  && thePoint.z < 0.5 && thePoint.z > -0.5)\
                  { return true;}\
          }\
+         if (objID == 1) {\
+             thePoint = objs[1].mIMatrix * aPoint;\
+             if (length(vec3(thePoint.xyz)) < 0.5)\
+                 { return true;}\
+         }\
          return false;\
      }\
      vec4 color(vec4 aPoint) {\
-         Intersection intersections[16];\
-         for(int i = 0; i < 16; i++) {\
+         Intersection intersections[8];\
+         for(int i = 0; i < 8; i++) {\
              intersections[i].objID = -1;\
              intersections[i].level = 6;\
          }\
@@ -446,10 +456,8 @@ function fShader() {
              return vec4(0.0, 0.0, 0.0, 1.0);\
          }\
          int top = 1;\
-         for(int i = 0; i < 16; i++) {\
+         for(int i = 0; i < 8; i++) {\
             if (intersections[i].level >= recursion) break;\
-            direction = reflect(intersections[i].direction, intersections[i].normal);\
-            thePoint = intersections[i].position + 0.0001 * direction;\
             float tmpBlend, tmpRef, tmpRefr = -1.0 , ior;\
             mat4 tmpIM;\
             for (int g = 0; g < 3; g++) {\
@@ -459,38 +467,42 @@ function fShader() {
                     tmpRefr = objs[g].refrective;\
                     ior = objs[g].ior;\
                     tmpIM = objs[g].mIMatrix;\
+                    break;\
                 }\
             }\
+            vec4 testPosition = intersections[i].position\
+                                + 0.0001 * intersections[i].direction;\
+            bool inside = testInside(intersections[i].objID, testPosition);\
+            vec4 tmpNormal = intersections[i].normal;\
+            if (!inside) {\
+                tmpRefr = 1.0/tmpRefr;\
+                tmpNormal = - tmpNormal;\
+            }\
+            direction = reflect(intersections[i].direction, tmpNormal);\
+            direction = normalize(direction);\
+            thePoint = intersections[i].position + 0.0001 * direction;\
             intersection = interSect(thePoint, direction,\
-                           intersections[i].coeff * tmpRef * tmpBlend);\
+                                     intersections[i].coeff\
+                                     * tmpRef * (1.0 - tmpBlend));\
             intersection.level = intersections[i].level + 1;\
             Intersection intersection1;\
             vec4 refreV;\
             bool transparent = false;\
             if (tmpRefr > 0.0) {\
-                vec4 testPosition = intersections[i].position\
-                                    + 0.0001 * intersections[i].direction;\
-                bool inside = testInside(intersections[i].objID, testPosition);\
-                vec4 tmpNormal = intersections[i].normal;\
-                if (!inside) {\
-                    tmpRefr = 1.0/tmpRefr;\
-                    tmpNormal = - tmpNormal;\
-                }\
                 refreV = normalize(refract(intersections[i].direction,\
                                            tmpNormal, tmpRefr));\
                 thePoint = intersections[i].position + 0.0001 * refreV;\
                 intersection1 = interSect(thePoint, refreV,\
-                           intersections[i].coeff * tmpRefr * tmpBlend);\
+                           intersections[i].coeff * tmpRefr * (1.0 - tmpBlend));\
                 intersection1.level = intersections[i].level + 1;\
                 transparent = true;\
             }\
-            for (int j = 0; j < 16; j++) {\
+            for (int j = 0; j < 8; j++) {\
                 if ( j == top) {\
                     intersections[j] = intersection;\
                     if(transparent) {\
                         intersections[j + 1] = intersection1;\
                     }\
-                } else if (j > top) {\
                     break;\
                 }\
             }\

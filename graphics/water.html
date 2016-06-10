@@ -117,10 +117,10 @@ function initScene() {
     gl.uniform1i(tmp, -1);
      
     tmp = gl.getUniformLocation(program, "objs[0].diffuse");
-    gl.uniform1f(tmp, 0.0);
+    gl.uniform1f(tmp, 0.1);
     
     tmp = gl.getUniformLocation(program, "objs[0].reflective");
-    gl.uniform1f(tmp, 0.1);
+    gl.uniform1f(tmp, 0.45);
     
     tmp = gl.getUniformLocation(program, "objs[0].shiness");
     gl.uniform1f(tmp, 30);
@@ -144,19 +144,19 @@ function initScene() {
     gl.uniform1f(tmp, 0.1);
     
     tmp = gl.getUniformLocation(program, "objs[1].reflective");
-    gl.uniform1f(tmp, 0.95);
+    gl.uniform1f(tmp, 0.1);
     
     tmp = gl.getUniformLocation(program, "objs[1].shiness");
-    gl.uniform1f(tmp, 10);
+    gl.uniform1f(tmp, 30);
     
     tmp = gl.getUniformLocation(program, "objs[1].refrective");
-    gl.uniform1f(tmp, 0.0);
+    gl.uniform1f(tmp, 1.0);
     
     tmp = gl.getUniformLocation(program, "objs[1].ior");
     gl.uniform1f(tmp, 1.0);
     
     tmp = gl.getUniformLocation(program, "objs[1].blend");
-    gl.uniform1f(tmp, 0.5);
+    gl.uniform1f(tmp, 0.8);
     
     tmp = gl.getUniformLocation(program, "objs[2].type");
     gl.uniform1i(tmp, 2);
@@ -168,13 +168,13 @@ function initScene() {
     gl.uniform1f(tmp, 0.5);
     
     tmp = gl.getUniformLocation(program, "objs[2].reflective");
-    gl.uniform1f(tmp, 0.1);
+    gl.uniform1f(tmp, 0.5);
     
     tmp = gl.getUniformLocation(program, "objs[2].shiness");
-    gl.uniform1f(tmp, 20.0);
+    gl.uniform1f(tmp, 10.0);
     
     tmp = gl.getUniformLocation(program, "objs[2].refrective");
-    gl.uniform1f(tmp, 0.0);
+    gl.uniform1f(tmp, -1.0);
     
     tmp = gl.getUniformLocation(program, "objs[2].ior");
     gl.uniform1f(tmp, 1.0);
@@ -183,7 +183,7 @@ function initScene() {
     gl.uniform1f(tmp, 0.8);
     
     tmp = gl.getUniformLocation(program, "recursion");
-    gl.uniform1i(tmp, 4);
+    gl.uniform1i(tmp, 2);
     
     //load vertices
     vertexBuffer = gl.createBuffer();
@@ -243,30 +243,27 @@ function loadParameters () {
     program.cubeMatrix = gl.getUniformLocation(program, "objs[0].mIMatrix");
     gl.uniformMatrix4fv(program.cubeMatrix, false, tmp); 
     
-    var tmpTran = mat4.create();
-    mat4.transpose(tmpTran, tmp);
+    mat4.transpose(tmp, tmp);
     program.cubeTransMatrix = gl.getUniformLocation(program, "objs[0].mTransMatrix");
-    gl.uniformMatrix4fv(program.cubeTransMatrix, false, tmpTran);     
+    gl.uniformMatrix4fv(program.cubeTransMatrix, false, tmp);     
    
     tmp = mat4.clone(sphereMatrix);
     mat4.invert(tmp, tmp);
     program.sphereMatrix = gl.getUniformLocation(program, "objs[1].mIMatrix");
     gl.uniformMatrix4fv(program.sphereMatrix, false, tmp);
     
-    tmpTran = mat4.create();
-    mat4.transpose(tmpTran, tmp);
+    mat4.transpose(tmp, tmp);
     program.cubeTransMatrix = gl.getUniformLocation(program, "objs[1].mTransMatrix");
-    gl.uniformMatrix4fv(program.cubeTransMatrix, false, tmpTran);  
+    gl.uniformMatrix4fv(program.cubeTransMatrix, false, tmp);  
     
     tmp = mat4.clone(planeMatrix);
     mat4.invert(tmp, tmp);
     program.planeMatrix = gl.getUniformLocation(program, "objs[2].mIMatrix");
     gl.uniformMatrix4fv(program.planeMatrix, false, tmp);
     
-    tmpTran = mat4.create();
-    mat4.transpose(tmpTran, tmp);
+    mat4.transpose(tmp, tmp);
     program.planeTransMatrix = gl.getUniformLocation(program, "objs[2].mTransMatrix");
-    gl.uniformMatrix4fv(program.planeTransMatrix, false, tmpTran); 
+    gl.uniformMatrix4fv(program.planeTransMatrix, false, tmp); 
     
     program.eye = gl.getUniformLocation(program, "eye");
     gl.uniform4fv(program.eye, camera.getEye());
@@ -432,7 +429,7 @@ function main() {
     initProgram();
     initLight();
     initTexture("tiles.jpg", 0);  
-    initTexture("earth.jpg", 1);  
+    initTexture("jumbo.gif", 1);  
     initScene();
 
     animateMyScene();  
