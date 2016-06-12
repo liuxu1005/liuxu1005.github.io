@@ -106,7 +106,7 @@ function initScene() {
     
     sphereMatrix = mat4.create();
     mat4.fromTranslation(translation, [0.8, -0.25, 0.0]);
-    mat4.fromScaling(scaling, [0.5, 0.5, 0.5]);
+    mat4.fromScaling(scaling, [0.3, 0.3, 0.3]);
     mat4.multiply(sphereMatrix, translation, scaling);
     
     var tmp;  
@@ -120,7 +120,7 @@ function initScene() {
     gl.uniform1f(tmp, 0.1);
     
     tmp = gl.getUniformLocation(program, "objs[0].reflective");
-    gl.uniform1f(tmp, 0.45);
+    gl.uniform1f(tmp, 0.0);
     
     tmp = gl.getUniformLocation(program, "objs[0].shiness");
     gl.uniform1f(tmp, 30);
@@ -150,7 +150,7 @@ function initScene() {
     gl.uniform1f(tmp, 30);
     
     tmp = gl.getUniformLocation(program, "objs[1].refrective");
-    gl.uniform1f(tmp, 1.0);
+    gl.uniform1f(tmp, -1.0);
     
     tmp = gl.getUniformLocation(program, "objs[1].ior");
     gl.uniform1f(tmp, 1.0);

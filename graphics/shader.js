@@ -87,13 +87,13 @@ function fShader() {
          return -1.0;\
      }\
      vec4 planeNormal(vec4 aPoint) {\
-         if ( aPoint.y< 0.0001 && aPoint.y > -0.0001) {\
+         if ( aPoint.y< 0.001 && aPoint.y > -0.001) {\
              return vec4(0.0, 1.0, 0.0, 0.0);\
          }\
          return vec4(0.0,0.0,0.0,0.0);\
      }\
      vec2 planeTcoord(vec4 aPoint) {\
-        if (aPoint.y< 0.0001 && aPoint.y > -0.0001) {\
+        if (aPoint.y< 0.001 && aPoint.y > -0.001) {\
             return vec2(0.5 - aPoint.x, 0.5 + aPoint.z);\
         }\
          return vec2(0.0,0.0);\
@@ -177,43 +177,43 @@ function fShader() {
          }\
      }\
      vec4 cubeNormal(vec4 aPoint) {\
-         if (aPoint.x< 0.5001 && aPoint.x > 0.4999) {\
+         if (aPoint.x< 0.501 && aPoint.x > 0.499) {\
              return vec4(1.0, 0.0, 0.0, 0.0);\
          }\
-         if (aPoint.x> -0.5001 && aPoint.x < -0.4999) {\
+         if (aPoint.x> -0.501 && aPoint.x < -0.499) {\
              return vec4(-1.0, 0.0, 0.0, 0.0);\
          }\
-         if ( aPoint.y< 0.2001 && aPoint.y > 0.1999) {\
+         if ( aPoint.y< 0.201 && aPoint.y > 0.199) {\
              return vec4(0.0, 1.0, 0.0, 0.0);\
          }\
-         if ( aPoint.y > -0.5001 && aPoint.y < -0.4999) {\
+         if ( aPoint.y > -0.501 && aPoint.y < -0.499) {\
              return vec4(0.0, -1.0, 0.0, 0.0);\
          }\
-         if ( aPoint.z< 0.5001 && aPoint.z > 0.4999) {\
+         if ( aPoint.z< 0.501 && aPoint.z > 0.499) {\
              return vec4(0.0, 0.0, 1.0, 0.0);\
          }\
-         if ( aPoint.z > -0.5001 && aPoint.z < -0.4999) {\
+         if ( aPoint.z > -0.501 && aPoint.z < -0.499) {\
              return vec4(0.0, 0.0, -1.0, 0.0);\
          }\
          return vec4(0.0,0.0,0.0,0.0);\
      }\
      vec2 cubeTcoord(vec4 aPoint) {\
-        if (aPoint.x< 0.5001 && aPoint.x > 0.4999) {\
+        if (aPoint.x< 0.501 && aPoint.x > 0.499) {\
             return vec2(0.5 - aPoint.z, 0.5 + aPoint.y);\
         }\
-        if (aPoint.x> -0.5001 && aPoint.x < -0.4999) {\
+        if (aPoint.x> -0.501 && aPoint.x < -0.499) {\
             return vec2(0.5 + aPoint.z, 0.5 + aPoint.y);\
         }\
-        if (aPoint.y< 0.2001 && aPoint.y > 0.1999) {\
+        if (aPoint.y< 0.501 && aPoint.y > 0.499) {\
             return vec2(0.5 - aPoint.x, 0.5 + aPoint.z);\
         }\
-        if ( aPoint.y > -0.5001 && aPoint.y < -0.4999) {\
+        if ( aPoint.y > -0.501 && aPoint.y < -0.499) {\
             return vec2(0.5 + aPoint.x, 0.5 + aPoint.z);\
         }\
-        if ( aPoint.z< 0.5001 && aPoint.z > 0.4999) {\
+        if ( aPoint.z< 0.501 && aPoint.z > 0.499) {\
             return vec2(0.5 + aPoint.x, 0.5 + aPoint.y);\
         }\
-        if ( aPoint.z > -0.5001 && aPoint.z < -0.4999) {\
+        if ( aPoint.z > -0.501 && aPoint.z < -0.499) {\
             return vec2(0.5 - aPoint.x, 0.5 + aPoint.y);\
         }\
          return vec2(0.0,0.0);\
@@ -233,30 +233,14 @@ function fShader() {
          if (tmp < 0.0) {\
              return -1.0;\
          }\
-         float r1 = (-B + sqrt(tmp))/(2.0 * A);\
-         float r2 = (-B - sqrt(tmp))/(2.0 * A);\
-         if (r1 < 0.0 && r2 < 0.0) {\
-            return -1.0;\
-         } else if (r1 < 0.0) {\
-            return r2;\
-         } else if (r2 < 0.0) {\
-            return r1;\
-         } else if (r1 > r2) {\
-            return  r2;\
-         } else {\
-            return r1;\
+         float r = (-B - sqrt(tmp))/(2.0 * A);\
+         if (r > 0.0) {\
+             return r;\
          }\
+         return -1.0;\
      }\
      vec4 sphereNormal(vec4 aPoint) {\
-        float tmp = aPoint.x * aPoint.x\
-	              + aPoint.y * aPoint.y\
-	              + aPoint.z * aPoint.z;\
-	    if (tmp < 0.25000001 && tmp > 0.24999999 ) {\
-	        vec4 n = vec4(aPoint.xyz, 0.0);\
-	        return normalize(n);\
-	    } else {\
-	        return  vec4(0.0, 0.0, 0.0, 0.0);\
-	    }\
+	        return normalize(vec4(aPoint.xyz, 0.0));\
      }\
      vec2 sphereTcoord(vec4 aPoint) {\
             float i, j;\
@@ -319,19 +303,19 @@ function fShader() {
              }\
          }\
          if (target >= 0 ) {\
-             vec4 position = vec4(origin.x + distance * direction.x,\
-                                  origin.y + distance * direction.y,\
-                                  origin.z + distance * direction.z,\
-                                                               1.0);\
+             vec4 position = vec4(origin.xyz + distance * direction.xyz,\
+                                                                   1.0);\
              vec4 objPosition, tmpn;\
              vec2 tmptcoord;\
              for (int k = 0; k < 3; k++) {\
                  if (target == k) {\
                      objPosition = objs[k].mIMatrix * position;\
-                     tmpn = normalize(objs[k].mTransMatrix * calNormal(objs[k].type, objPosition));\
+                     tmpn = normalize(objs[k].mTransMatrix\
+                              * calNormal(objs[k].type, objPosition));\
                      tmptcoord = calTcoord(objs[k].type, objPosition);\
                      return Intersection(k, 6, coeff, origin,\
-                                         direction, position, tmpn, tmptcoord);\
+                                         direction, position,\
+                                         tmpn, tmptcoord);\
                  }\
              }\
          } else {\
@@ -348,11 +332,18 @@ function fShader() {
         vec4 texture;\
         float blend, shiness, od, os;\
         if (i.objID == 0) {\
-            vec4 objPosition = objs[0].mIMatrix * i.position;\
-            if (objPosition.y > 0.2001) {\
-                texture =  vec4(0.5, 0.4, 0.3, 0.0);\
+            if (objs[0].texture == 0) {\
+                texture = texture2D(image0, i.tcoord);\
+            } else\
+            if (objs[0].texture == 1) {\
+                texture = texture2D(image1, i.tcoord);\
             } else {\
-                texture = vec4(0.4, 0.9, 1.0, 1.0);\
+                vec4 objPosition = objs[0].mIMatrix * i.position;\
+                if (objPosition.y > 0.201) {\
+                   texture =  vec4(0.5, 0.4, 0.3, 0.0);\
+                } else {\
+                    texture = vec4(0.4, 0.9, 1.0, 1.0);\
+                }\
             }\
             blend = objs[0].blend;\
             shiness = objs[0].shiness;\
@@ -362,9 +353,11 @@ function fShader() {
         if (i.objID == 1) {\
             if (objs[1].texture == 0) {\
                 texture = texture2D(image0, i.tcoord);\
-            }\
+            } else\
             if (objs[1].texture == 1) {\
                 texture = texture2D(image1, i.tcoord);\
+            } else {\
+                texture = vec4(0.4, 0.9, 1.0, 1.0);\
             }\
             blend = objs[1].blend;\
             shiness = objs[1].shiness;\
@@ -414,9 +407,6 @@ function fShader() {
      }\
      vec4 colorHelper(Intersection intersections[8]) {\
              vec4 color = vec4(0.0, 0.0, 0.0, 0.0);\
-             if (intersections[0].objID == 1\
-                  && intersections[1].objID < 0)\
-                  return vec4(1.0, 0.0, 0.0, 1.0);\
              for (int i = 0; i < 8; i++) {\
                  if (intersections[i].level > recursion) break;\
                  if (intersections[i].objID < 0) continue;\
@@ -435,8 +425,11 @@ function fShader() {
          }\
          if (objID == 1) {\
              thePoint = objs[1].mIMatrix * aPoint;\
-             if (length(vec3(thePoint.xyz)) < 0.5)\
-                 { return true;}\
+             float tmp = thePoint.x * thePoint.x\
+                       + thePoint.y * thePoint.y\
+                       + thePoint.z * thePoint.z;\
+             if (tmp < 0.25001)\
+             { return true;}\
          }\
          return false;\
      }\
@@ -448,7 +441,7 @@ function fShader() {
          }\
          vec4 thePoint = viewToWorld(aPoint);\
          vec4 direction = castRay(thePoint);\
-         Intersection intersection = interSect(thePoint, direction, 1.0);\
+         Intersection intersection = interSect(eye, direction, 1.0);\
          if (intersection.objID >=0) {\
              intersection.level = 0;\
              intersections[0] = intersection;\
@@ -458,15 +451,15 @@ function fShader() {
          int top = 1;\
          for(int i = 0; i < 8; i++) {\
             if (intersections[i].level >= recursion) break;\
-            float tmpBlend, tmpRef, tmpRefr = -1.0 , ior;\
+            float tmpBlend = 0.0, tmpRef = 0.0, tmpRefr = -1.0 , ior = 1.0;\
             mat4 tmpIM;\
             for (int g = 0; g < 3; g++) {\
                 if (g == intersections[i].objID) {\
                     tmpBlend = objs[g].blend;\
                     tmpRef = objs[g].reflective;\
-                    tmpRefr = objs[g].refrective;\
                     ior = objs[g].ior;\
                     tmpIM = objs[g].mIMatrix;\
+                    tmpRefr = objs[g].refrective;\
                     break;\
                 }\
             }\
@@ -478,10 +471,10 @@ function fShader() {
                 tmpRefr = 1.0/tmpRefr;\
                 tmpNormal = - tmpNormal;\
             }\
-            direction = reflect(intersections[i].direction, tmpNormal);\
-            direction = normalize(direction);\
-            thePoint = intersections[i].position + 0.0001 * direction;\
-            intersection = interSect(thePoint, direction,\
+            vec4 refV = reflect(intersections[i].direction, tmpNormal);\
+            refV = normalize(refV);\
+            vec4 newOrigin = intersections[i].position + 0.0001 * refV;\
+            intersection = interSect(newOrigin, refV,\
                                      intersections[i].coeff\
                                      * tmpRef * (1.0 - tmpBlend));\
             intersection.level = intersections[i].level + 1;\
@@ -489,10 +482,10 @@ function fShader() {
             vec4 refreV;\
             bool transparent = false;\
             if (tmpRefr > 0.0) {\
-                refreV = normalize(refract(intersections[i].direction,\
-                                           tmpNormal, tmpRefr));\
-                thePoint = intersections[i].position + 0.0001 * refreV;\
-                intersection1 = interSect(thePoint, refreV,\
+                refreV = refract(intersections[i].direction,\
+                                           tmpNormal, tmpRefr);\
+                newOrigin = intersections[i].position + 0.0001 * refreV;\
+                intersection1 = interSect(newOrigin, refreV,\
                            intersections[i].coeff * tmpRefr * (1.0 - tmpBlend));\
                 intersection1.level = intersections[i].level + 1;\
                 transparent = true;\
