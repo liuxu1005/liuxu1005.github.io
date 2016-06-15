@@ -23,14 +23,35 @@ var canvas;
 var gl;
 var mylightPosition = vec4.fromValues(0.0, 40.0, 0.0, 1.0);
 var mylightColor = vec4.fromValues(0.5, 0.8, 0.8, 1.0);
-var matrixStack = []; 
+
 
 var cubeMatrix;
 var sphereMatrix;
 var planeMatrix;
 
-var vertexBuffer;
+var sphereCenter = vec4.fromValues(0.8, 1.0, 0.0, 1.0);
+var sphereR = 0.15;
+var sphereVelocity = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
+var gravity = vec4.fromValues(0.0, -0.003, 0.0, 0.0);
+var buoyance =vec4.clone(gravity);
+vec4.scale(buoyance, buoyance, -0.9);
+var sumForce = vec4.clone(gravity);
+var mass = 1;
+var epsilon = 0.005;
 
+
+var cubeX = 0.6;
+var cubeTopY = 0.06;
+var cubeTopY1 = 0.3;
+var cubeBottomY = -0.5
+var cubeZ = 0.6;
+
+var floorX = 2;
+var floorY = -0.51;
+var floorZ = 2;
+ 
+
+var vertexBuffer;
 var texture = []; 
 
  
@@ -105,7 +126,7 @@ function initScene() {
     mat4.scale(cubeMatrix, cubeMatrix, [1.2, 0.8, 1.2]);
     
     sphereMatrix = mat4.create();
-    mat4.fromTranslation(translation, [0.8, -0.25, 0.0]);
+    mat4.fromTranslation(translation, [0.8, 1.0, 0.0]);
     mat4.fromScaling(scaling, [0.3, 0.3, 0.3]);
     mat4.multiply(sphereMatrix, translation, scaling);
     
@@ -120,7 +141,7 @@ function initScene() {
     gl.uniform1f(tmp, 0.1);
     
     tmp = gl.getUniformLocation(program, "objs[0].reflective");
-    gl.uniform1f(tmp, 0.0);
+    gl.uniform1f(tmp, 0.3);
     
     tmp = gl.getUniformLocation(program, "objs[0].shiness");
     gl.uniform1f(tmp, 30);
@@ -382,8 +403,11 @@ function duringDrag(px, py) {
                   + (curY - startY) * (curY - startY));
        
         vec3.scale(moveVector, moveVector, mag);
-        mat4.translate(sphereMatrix, sphereMatrix, moveVector);
-          
+        var translation = mat4.create();
+        mat4.fromTranslation(translation, moveVector);
+        mat4.multiply(sphereMatrix, translation, sphereMatrix);
+        mat4.multiply(sphereCenter, translation, sphereCenter);
+        sphereVelocity = vec4.fromValues(0.0, 0.0, 0.0, 0.0); 
     
     } else if (mousedown) {
     
@@ -418,9 +442,228 @@ function touchEnd(event) {
     stopDrag();
 }
 
+ 
+
+
+function distanceToPlane(type, coord, edge) {
+	if (type == 0) {
+		if (sphereCenter[0] < (edge + sphereR)
+			&& sphereCenter[0] > (-edge - sphereR)
+			&& sphereCenter[2] < (edge + sphereR)
+			&& sphereCenter[2] > (-edge - sphereR)){
+			
+			return Math.abs(sphereCenter[1] - coord);
+		} else { return -1.0;}
+		
+	} else if (type == 1) {
+		if (sphereCenter[0] < (edge + sphereR)
+			&& sphereCenter[0] > (-edge - sphereR)
+			&& sphereCenter[1] < (cubeTopY1 + sphereR)
+			&& sphereCenter[1] > (cubeBottomY)){
+			
+			return Math.abs(sphereCenter[2] - coord);
+		} else { return -1.0;}
+	
+	} else if (type == 2) {
+		if (sphereCenter[2] < (edge + sphereR)
+			&& sphereCenter[2] > (-edge - sphereR)
+			&& sphereCenter[1] < (cubeTopY1 + sphereR)
+			&& sphereCenter[1] > (cubeBottomY)){
+			
+			return Math.abs(sphereCenter[0] - coord);
+		} else { return -1.0;}
+	} else if (type == 3) {
+		if ((sphereCenter[0] < (edge + sphereR)
+			&& sphereCenter[0] > (edge - sphereR))
+			|| (sphereCenter[0] < (-edge + sphereR)
+			&& sphereCenter[0] > (-edge - sphereR))
+			|| (sphereCenter[2] < (edge + sphereR)
+			&& sphereCenter[2] > (edge - sphereR))
+			|| (sphereCenter[2] < (-edge + sphereR)
+			&& sphereCenter[2] > (-edge - sphereR))){
+			
+			return Math.abs(sphereCenter[1] - coord);
+		} else { return -1.0;}	
+	} else {
+	    return  -1.0;
+	}
+
+}
+
+function hitObjs() {
+
+	var d1 = distanceToPlane(0, floorY, floorX);
+	var d2 = distanceToPlane(1, 0.6, cubeX);
+	var d3 = distanceToPlane(1, -0.6, cubeX);
+	var d4 = distanceToPlane(2, 0.6, cubeZ);
+	var d5 = distanceToPlane(2, -0.6, cubeZ);
+	var d6 = distanceToPlane(3, cubeTopY1, cubeX);
+	var tmp = vec4.create();
+	var hitN = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
+	
+	if (d1 > 0.0 && d1 < sphereR) {
+		if (sphereCenter[1] > floorY) {
+			tmp = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
+		} else {
+			tmp = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
+		}
+		vec4.add(hitN, hitN, tmp);
+	
+	}
+	if (d2 > 0.0 && d2 < sphereR) {
+		if (sphereCenter[2] > 0.6) {
+			tmp = vec4.fromValues(0.0, 0.0, 1.0, 0.0);
+		} else {
+			tmp = vec4.fromValues(0.0, 0.0, -1.0, 0.0);
+		}
+		vec4.add(hitN, hitN, tmp);
+	
+	}
+	if (d3 > 0.0 && d3 < sphereR) {
+		if (sphereCenter[2] > -0.6) {
+			tmp = vec4.fromValues(0.0, 0.0, 1.0, 0.0);
+		} else {
+			tmp = vec4.fromValues(0.0, 0.0, -1.0, 0.0);
+		}
+		vec4.add(hitN, hitN, tmp);
+	
+	}
+	if (d4 > 0.0 && d4 < sphereR) {
+		if (sphereCenter[0] > 0.6) {
+			tmp = vec4.fromValues(1.0, 0.0, 0.0, 0.0);
+		} else {
+			tmp = vec4.fromValues(-1.0, 0.0, 0.0, 0.0);
+		}
+		vec4.add(hitN, hitN, tmp);
+	
+	}
+	if (d5 > 0.0 && d5 < sphereR) {
+		if (sphereCenter[0] > -0.6) {
+			tmp = vec4.fromValues(1.0, 0.0, 0.0, 0.0);
+		} else {
+			tmp = vec4.fromValues(-1.0, 0.0, 0.0, 0.0);
+		}
+		vec4.add(hitN, hitN, tmp);
+	
+	}
+	if (d6 > 0.0 && d6 < sphereR) {
+		if (sphereCenter[1] > cubeTopY1) {
+			tmp = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
+		} else {
+			tmp = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
+		}
+		vec4.add(hitN, hitN, tmp);
+	
+	}
+	return vec4.normalize(hitN, hitN);
+
+}
+
+function roundVelocity() {
+
+	if (Math.abs(sphereVelocity[0]) < 1e-6) {
+		sphereVelocity[0] = 0.0;
+	}
+	if (Math.abs(sphereVelocity[1]) < 1e-6) {
+		sphereVelocity[1] = 0.0;
+	}
+	if (Math.abs(sphereVelocity[2]) < 1e-6) {
+		sphereVelocity[2] = 0.0;
+	}
+
+}
+function updateVelocity() {
+ 
+    var normal = hitObjs(); 
+ 
+    if (vec4.length(normal) > 0.01) {
+
+		var component = -1.65 * vec4.dot(normal, sphereVelocity) 
+		 
+		var componentV = vec4.create();
+		vec4.scale(componentV, normal, component);
+		vec4.add(sphereVelocity, sphereVelocity, componentV);
+	 
+		var tmp = vec4.create();
+		vec4.add(sphereVelocity,
+		         vec4.scale(tmp, sumForce, mass),
+		         sphereVelocity);
+		
+	} else {
+    	var tmp = vec4.create();
+		vec4.add(sphereVelocity,
+		         vec4.scale(tmp, sumForce, mass),
+		         sphereVelocity);
+	}
+	
+	roundVelocity();
+ 
+ 
+}
+ 
+function updatePosition() {
+    var move = vec3.fromValues(sphereVelocity[0],
+                               sphereVelocity[1],
+                               sphereVelocity[2]);
+    var moveMatrix = mat4.create();
+    mat4.fromTranslation(moveMatrix, move);
+    mat4.multiply(sphereMatrix, moveMatrix, sphereMatrix);
+    vec4.add(sphereCenter, sphereCenter, sphereVelocity);
+ 
+}
+
+function updateForce() {
+
+	if(sphereCenter[0] < cubeX && sphereCenter[0] > -cubeX
+	         && sphereCenter[2] < cubeZ && sphereCenter[2] > - cubeZ ) {
+	         
+	    if (sphereCenter[1] > cubeTopY + sphereR) {
+	    
+	    	sumForce = vec4.clone(gravity);  
+	    	
+		} else if (sphereCenter[1] > cubeBottomY + sphereR + 5 * epsilon) {
+			var tmp = vec4.create();
+			vec4.scale(tmp, sphereVelocity, -0.05); 
+			sumForce = vec4.add(sumForce, buoyance, gravity);
+			vec4.add(sumForce, sumForce, tmp);
+		} else {
+			var tmp = vec4.create();
+			vec4.scale(tmp, sphereVelocity, -0.05);  
+			sumForce = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
+			vec4.add(sumForce, sumForce, tmp);
+		}
+		
+	} else if (sphereCenter[0] < floorX && sphereCenter[0] > -floorX
+	    && sphereCenter[2] < floorZ && sphereCenter[2] > -floorZ) {
+
+  		if (sphereCenter[1] > (floorY + sphereR - 5 * epsilon) 
+  		   && sphereCenter[1] < (floorY + sphereR + 5 * epsilon)) {
+	 
+	    	sumForce = vec4.fromValues(0.0, 0.0, 0.0, 0.0);  
+	    	
+		} else {
+			sumForce = vec4.clone(gravity); 
+		}	    
+	    
+	} else {
+		sumForce = vec4.clone(gravity);
+	}
+ 
+}
+
+function updateScene() {
+    
+    updateForce();
+    updateVelocity();
+    updatePosition();
+
+}
+
 function animateMyScene() {
-	requestAnimationFrame(animateMyScene);   
+	   
 	drawScene();
+	updateScene();
+	requestAnimationFrame(animateMyScene);
 }
 
 function main() {
