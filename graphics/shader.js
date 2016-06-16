@@ -57,8 +57,31 @@ function fShader() {
      uniform vec4 eye;\
      uniform obj  objs[3];\
      uniform int recursion;\
+     uniform vec4 dCenter;\
+     uniform float elapse;\
      Ambient ambient = Ambient(0.5, 0.5, 0.5);\
      \
+     vec4 calDNormal(vec4 p) {\
+        float speed = 0.05;\
+        float A = 3.0;\
+     	float D = length(p.xyz - dCenter.xyz);\
+     	if (elapse <= D/speed) return vec4(0.0, 1.0, 0.0, 0.0);\
+     	float xcomponent = (p.x - dCenter.x)/D;\
+     	float zcomponent = (p.z - dCenter.z)/D;\
+     	float angle = elapse - D/speed;\
+     	float tmpcomponent = ((-A/D)/elapse) * (sin(angle)/D + cos(angle)/speed);\
+     	if (tmpcomponent < 1e-6) return vec4(0.0, 1.0, 0.0, 0.0);\
+     	return normalize(vec4(xcomponent, 1.0/tmpcomponent, zcomponent, 0.0));\
+     }\
+     float calDeltaY(vec4 p) {\
+        float speed = 0.1;\
+        float A = 3.0;\
+     	float D = length(p.xyz - dCenter.xyz);\
+     	if (elapse <= D/speed) return 0.0;\
+     	float angle = elapse - D/speed;\
+     	float deltaY =(A/elapse)*(sin(angle)/D);\
+     	return deltaY;\
+     }\
      vec4 castRay(vec4 point) {\
          return normalize(vec4(point.x - eye.x,\
                                point.y - eye.y,\
@@ -184,7 +207,7 @@ function fShader() {
              return vec4(-1.0, 0.0, 0.0, 0.0);\
          }\
          if ( aPoint.y< 0.201 && aPoint.y > 0.199) {\
-             return vec4(0.0, 1.0, 0.0, 0.0);\
+             return calDNormal(aPoint);\
          }\
          if ( aPoint.y > -0.501 && aPoint.y < -0.499) {\
              return vec4(0.0, -1.0, 0.0, 0.0);\
@@ -327,6 +350,20 @@ function fShader() {
                                  vec2(0.0, 0.0));\
          }\
      }\
+     vec4 caustics(vec4 aPoint) {\
+     	vec3 lightV = normalize(mylightPosition.xyz - aPoint.xyz);\
+     	float t = 0.2 - aPoint.y;\
+     	float interX = aPoint.x + t * lightV.x;\
+     	float interZ = aPoint.z + t * lightV.z;\
+     	if (interX < 0.6 && interX > -0.6\
+     	    && interZ < 0.6 && interZ > -0.6) {\
+     	    float delta = calDeltaY(vec4(interX,\
+     	                                 (aPoint.y + t * lightV.y),\
+     	                                  interZ, 1.0));\
+     	    return vec4(0.2, 0.2, 0.2, 0.0) * delta * 15.0;\
+     	}\
+     	return vec4(0.0, 0.0, 0.0, 0.0);\
+     }\
      vec4 getObjColor(Intersection i) {\
         if(i.objID < 0) return vec4(0.0, 0.0, 0.0, 1.0);\
         vec4 texture;\
@@ -399,7 +436,8 @@ function fShader() {
             dotD = 0.0;\
             specular = 0.0;\
         }\
-        vec4 color = blend * texture\
+        vec4 caustics = caustics(i.position);\
+        vec4 color = blend * (texture + caustics)\
                      + (1.0 - blend)\
                      * (dotD * mylightColor * od * ambient.d\
                      + specular * mylightColor * os * ambient.s);\
