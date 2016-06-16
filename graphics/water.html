@@ -2,6 +2,14 @@
 <head>
 <meta charset="utf-8">
 <title>Water</title>
+<style>
+#section {
+    width:40%;
+    float:right;
+    padding:1%;
+    color:white;
+}
+</style>
 <script src="gl-matrix-min.js"></script>
 <script src="shader.js"></script>
 <script src="camera.js"></script>
@@ -16,6 +24,34 @@
         ontouchmove="touchMove(event)" ontouchend="touchEnd(event)">
 Sphere in Water
 </canvas>
+
+<div id="section">
+
+
+<button type="button" onclick="pause()">Pause</button>
+
+<button type="button" onclick="reset()">Start Over</button>
+<br>
+<ul>
+<li> Interactions
+    <ul>
+        <li>Drag sphere to move around</li>
+        <li>Drag background to rotate scene</li>
+        <li>Click button to pause or start over</li>
+     
+    </ul>
+</li>
+<br>
+<li>Features
+    <ul>
+    <li>Ray tracing with reflections and refractions in shader</li>
+    <li>Collision and response</li>
+    <li>Waterwave simulation</li>
+    <li>Caustics</li>
+    </ul>
+</li>
+</ul>
+</div>
 
 </body>
  

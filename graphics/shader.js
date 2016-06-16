@@ -353,6 +353,7 @@ function fShader() {
      vec4 caustics(vec4 aPoint) {\
      	vec3 lightV = normalize(mylightPosition.xyz - aPoint.xyz);\
      	float t = 0.2 - aPoint.y;\
+     	if ( t < 0.0) return vec4(0.0, 0.0, 0.0, 0.0);\
      	float interX = aPoint.x + t * lightV.x;\
      	float interZ = aPoint.z + t * lightV.z;\
      	if (interX < 0.6 && interX > -0.6\
@@ -360,7 +361,7 @@ function fShader() {
      	    float delta = calDeltaY(vec4(interX,\
      	                                 (aPoint.y + t * lightV.y),\
      	                                  interZ, 1.0));\
-     	    return vec4(0.2, 0.2, 0.2, 0.0) * delta * 15.0;\
+     	    return vec4(0.2, 0.2, 0.2, 0.0) * delta * 25.0;\
      	}\
      	return vec4(0.0, 0.0, 0.0, 0.0);\
      }\
@@ -437,9 +438,10 @@ function fShader() {
             specular = 0.0;\
         }\
         vec4 caustics = caustics(i.position);\
-        vec4 color = blend * (texture + caustics)\
+        vec4 color = blend * texture\
                      + (1.0 - blend)\
                      * (dotD * mylightColor * od * ambient.d\
+                     + caustics\
                      + specular * mylightColor * os * ambient.s);\
         return color;\
      }\

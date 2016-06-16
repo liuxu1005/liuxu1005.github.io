@@ -10,16 +10,24 @@ var cubeMatrix;
 var sphereMatrix;
 var planeMatrix;
 
-var sphereCenter = vec4.fromValues(0.55, 1.0, 0.0, 1.0);
+var sphereCenter;
 var sphereR = 0.15;
-var sphereVelocity = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
+var sphereVelocity;
 var gravity = vec4.fromValues(0.0, -0.003, 0.0, 0.0);
 var buoyance =vec4.clone(gravity);
 vec4.scale(buoyance, buoyance, -0.9);
-var sumForce = vec4.clone(gravity);
+var sumForce;
 var mass = 1;
 var epsilon = 0.005;
 
+
+var initSphereMatrix = mat4.create();
+    mat4.translate(initSphereMatrix, initSphereMatrix, [0.55, 1.0, 0.0]);
+    mat4.scale(initSphereMatrix, initSphereMatrix, [0.3, 0.3, 0.3]);
+   
+var initSphereCenter = vec4.fromValues(0.55, 1.0, 0.0, 1.0);
+var initForce = vec4.clone(gravity)
+var initVelocity = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
 
 var cubeX = 0.6;
 var cubeTopY = 0.06;
@@ -50,7 +58,7 @@ var startX = 0.0;
 var startY = 0.0;
 var camera = new Camera();   
 
-
+var paused = false;
 
 function initWebgl() {
     canvas = document.getElementById('Earth in Water');
@@ -96,9 +104,6 @@ function initLight() {
 
 function initScene() {
 
-
-    var translation = mat4.create(), 
-        scaling = mat4.create();
     
     planeMatrix = mat4.create();
     mat4.translate(planeMatrix, planeMatrix, [0.0, -0.51, 0.0]);
@@ -108,10 +113,10 @@ function initScene() {
     mat4.translate(cubeMatrix, cubeMatrix, [0.0, -0.1, 0.0]);
     mat4.scale(cubeMatrix, cubeMatrix, [1.2, 0.8, 1.2]);
     
-    sphereMatrix = mat4.create();
-    mat4.fromTranslation(translation, [0.55, 1.0, 0.0]);
-    mat4.fromScaling(scaling, [0.3, 0.3, 0.3]);
-    mat4.multiply(sphereMatrix, translation, scaling);
+	sphereCenter = vec4.clone(initSphereCenter);
+	sphereMatrix = mat4.clone(initSphereMatrix);
+	sphereVelocity = vec4.clone(initVelocity);
+	sumForce = vec4.clone(initForce);
     
     var tmp;  
     tmp = gl.getUniformLocation(program, "objs[0].type");
@@ -287,9 +292,7 @@ function loadParameters () {
     gl.uniform4fv(tmp, dCenter);
     
     tmp = gl.getUniformLocation(program, "elapse");
-    gl.uniform1f(tmp, time);
-    console.log("time "+time + " "+tmp);
-    time = time + 30;
+    gl.uniform1f(tmp, time);  
     
     bindTexture(0, "image0");
     bindTexture(1, "image1");
@@ -302,7 +305,8 @@ function checkCollideWater() {
 			&& sphereCenter[0] > -cubeX
 			&& sphereCenter[2] < cubeZ
 			&& sphereCenter[2] > -cubeZ
-			&& Math.abs(sphereCenter[1] - 0.06) < sphereR){
+			&& Math.abs(sphereCenter[1] - 0.06) < sphereR + epsilon/2
+			&& Math.abs(sphereCenter[1] - 0.06) > sphereR - epsilon/2){
 			
 			time = 100;
 			dCenter = [sphereCenter[0], 0.06, sphereCenter[2], 1.0];
@@ -665,8 +669,28 @@ function updateScene() {
 function animateMyScene() {
  
 	drawScene();
-	updateScene();
+	if(!paused) {
+	 	time = time + 30;
+		updateScene();
+	}
 	requestAnimationFrame(animateMyScene);
+}
+
+function pause() {
+	if (paused == false) {
+		paused = true;
+	} else {
+		paused = false;
+	}
+
+}
+
+function reset() {
+	time = 100000;
+	sphereCenter = vec4.clone(initSphereCenter);
+	sphereMatrix = mat4.clone(initSphereMatrix);
+	sphereVelocity = vec4.clone(initVelocity);
+	sumForce = vec4.clone(initForce);
 }
 
 function main() {
@@ -676,6 +700,7 @@ function main() {
     initLight();
     initTexture("tiles.jpg", 0);  
     initTexture("jumbo.gif", 1);  
+    
     initScene();
 
     animateMyScene();  
