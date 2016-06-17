@@ -13,7 +13,7 @@ var planeMatrix;
 var sphereCenter;
 var sphereR = 0.15;
 var sphereVelocity;
-var gravity = vec4.fromValues(0.0, -0.003, 0.0, 0.0);
+var gravity = vec4.fromValues(0.0, -0.001, 0.0, 0.0);
 var buoyance =vec4.clone(gravity);
 vec4.scale(buoyance, buoyance, -0.9);
 var sumForce;
@@ -305,8 +305,8 @@ function checkCollideWater() {
 			&& sphereCenter[0] > -cubeX
 			&& sphereCenter[2] < cubeZ
 			&& sphereCenter[2] > -cubeZ
-			&& Math.abs(sphereCenter[1] - 0.06) < sphereR + epsilon
-			&& Math.abs(sphereCenter[1] - 0.06) > sphereR - epsilon){
+			&& (sphereCenter[1] - 0.06) < sphereR + epsilon
+			&& (sphereCenter[1] - 0.06) > sphereR - epsilon){
 			
 			time = 100;
 			dCenter = [sphereCenter[0], 0.06, sphereCenter[2], 1.0];

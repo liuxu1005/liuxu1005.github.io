@@ -62,10 +62,10 @@ function fShader() {
      Ambient ambient = Ambient(0.5, 0.5, 0.5);\
      \
      vec4 calDNormal(vec4 p) {\
-        float speed = 0.05;\
+        float speed = 0.025;\
         float A = 3.0;\
      	float D = length(p.xyz - dCenter.xyz);\
-     	if (elapse <= D/speed) return vec4(0.0, 1.0, 0.0, 0.0);\
+     	if (elapse <= 20.0 * D/speed) return vec4(0.0, 1.0, 0.0, 0.0);\
      	float xcomponent = (p.x - dCenter.x)/D;\
      	float zcomponent = (p.z - dCenter.z)/D;\
      	float angle = elapse - D/speed;\
@@ -74,10 +74,10 @@ function fShader() {
      	return normalize(vec4(xcomponent, 1.0/tmpcomponent, zcomponent, 0.0));\
      }\
      float calDeltaY(vec4 p) {\
-        float speed = 0.1;\
+        float speed = 0.025;\
         float A = 3.0;\
      	float D = length(p.xyz - dCenter.xyz);\
-     	if (elapse <= D/speed) return 0.0;\
+     	if (elapse <= 20.0 * D/speed) return 0.0;\
      	float angle = elapse - D/speed;\
      	float deltaY =(A/elapse)*(sin(angle)/D);\
      	return deltaY;\
