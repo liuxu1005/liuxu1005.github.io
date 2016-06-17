@@ -79,7 +79,7 @@ which need the step, It doesn't matter. However when it comes to internet, which
 complicated and plays significantly roles in people's life, it realy matters. The reason is, for internet --- 
 such a giant complex infrastructure,
 one more step means huge overhead and inconvenience sometimes even danger.
-<span style="color:magenta;font-weight:bold">It's important to realize that CCN represents a change to the model of the network, not just the elimination of a step. For example, on the web as we know it the content addressed by a particular URI can change over time, as we see with a weather report for example. In CCN, the data that is addressed directly is immutable... when the content changes, the name changes. Of course, additional layers can be added to give the appearance of the web as we know it, but my point that the change is much more fundamental than eliminating a lookup step.</span>
+ 
 </p>
 <p>In general, I think it is the trend that we eventually will switch to this new architecture. Although current
 architecture may be still useful for some specific application, however, for the most important application --- information delivery
@@ -91,7 +91,7 @@ inconvinence, it will happen.</p>
 <h3>A Little History Relfecting the Trend</h3>
 <p>
 In the early year when internet just began to expand, the original goal was to
-connect together the original ARPANET with the ARPA packet radio network, <span style="color:magenta;font-weight:bold">I think you are somewhat overemphasizing the role of the packet radio network at that stage... It is certainly true that the Alohanet packet radio network was very influential, and in particular inspired the design of the ethernet wired network. You're also correct that a primary goal of the ARPANET was resource sharing and remote machine access.</span>in order
+connect together the original ARPANET with the ARPA packet radio network, in order
 to give users access to the large sevice machines on the ARPANET [5]. In other words,
 out goal is connect to the machine and work on it; data is not under consideration. 
 The TCP/IP protocol works so well for that goal.
@@ -104,7 +104,7 @@ comfortable with host-to-host style.
 Later, WWW appeared[6]. We become further caring more about data. If you compare the 
 sturcture of WWW URI with naming system of CCN, you can see they are 
 almost in the same sturcture except there is a host part resolved by DNS in URI. 
-<span style="color:magenta;font-weight:bold">Again, the big difference in CCN as far as I know is that what is named is <em>immutable</em> data; that's very different from what a URI names.</span>
+ 
 However as
 a user, we don't care how you resolve the host part under the hood; we only care about
 the refered object. In some sence, WWW already has been telling us "What
@@ -155,7 +155,7 @@ to touch each other indirectly or directly. This is a set of algorithms combinin
 IP address and packets form one of the most important protocol of current 
 architecture --- IP. 
 </p>
-<span style="color:magenta;font-weight:bold">The above is a good explanation.</span>
+ 
 <p>
 Fourth, another most important protocol, TCP, protocol provides a higher-level interface 
 for upper applications.
@@ -232,7 +232,7 @@ best to understand them.
 <ul>
     <li>
     Impacts on WWW
-    <p>I think the CCN is very similar to WWW on naming and retriving informaion. Therefore I don't think current architecture of WWW need significant changes. The main change probably is that we can directly resolve the URI without visiting DNS. <span style="color:magenta;font-weight:bold">Think about what you would use as the URI for the New York Times' home page, or for a link to the current weather in Boston. How would you do that with a CCN? I think the changes are more complex than you are describing.</span></p>
+    <p>I think the CCN is very similar to WWW on naming and retriving informaion. Therefore I don't think current architecture of WWW need significant changes. The main change probably is that we can directly resolve the URI without visiting DNS. </p>
     </li>
 
     <li>
@@ -246,7 +246,7 @@ best to understand them.
     </li>
     <li>
     Impacts on Search Engine
-    <p>CCN should be able to take on simple searching tasks without the need to crawl across the whole internet. <span style="color:magenta;font-weight:bold">I am not convinced. Think about the service at search engines like Google and Bing provide. They searched the graph of web links retrieving all the content on the web, so that they can answer questions like "Which pages  are useful in finding out Tim Berners-Lee's views on network neutrality." In what ways do CCN allow this to be done without a crawl?</span></p>
+    <p>CCN should be able to take on simple searching tasks without the need to crawl across the whole internet. </p>
     </li>
 
 </ul>
@@ -258,14 +258,14 @@ best to understand them.
 		     <p>As our comp 150IDS told us, naming is so important which determine how you design and
 		     implement the whole system. We can consider URI and hierachical string used in CCN as naming. 
 		     It possesses many advantages: 1> it facilitates lookup costing O(log n);  <br/>2> it dicentralizes
-		     the right of naming; 3> it can be extensible... <span style="color:magenta;font-weight:bold">excellent!</span> </p>
+		     the right of naming; 3> it can be extensible...   </p>
 		</li>
 		<li>
             Module and Layer  
             <p>To design a complicated system, we must modularize the system and exploit layering to make the design
             more clear. By modulizing and layering, we focus on one important problem each time, which make implementation
             and maintenance more effecient. And also they enable us to modify or extend the system without affecting other
-            parts.We can see the good examples from both CCN and TCP/IP architecture layers <span style="color:magenta;font-weight:bold">Very good!</span></p>
+            parts.We can see the good examples from both CCN and TCP/IP architecture layers  </p>
 		</li>
 		<li>
 		    Performance
@@ -278,7 +278,7 @@ best to understand them.
 		    <p>The Metcalfe's law tell us that the larger internet will be much more valuable. However, how to guarrentee the network will              work as well as it grows dramatically is a big problem---scalability.
 		    Scalability is especially important to network architecture, which inherently has high requirement on this.
 		       In network architecture design, the designer are doing their best to exploit parallel methods and hierachical
-		       structure to reach high scalability. However the Amdahl's law always constrains the parallel extent.<span style="color:magenta;font-weight:bold">Here I think you could say more about how Metcalfe's law and CCN's are related.</span>  </p>
+		       structure to reach high scalability. However the Amdahl's law always constrains the parallel extent.  </p>
 		</li>
 		<li>
 		Security
