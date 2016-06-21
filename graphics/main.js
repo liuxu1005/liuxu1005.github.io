@@ -11,6 +11,7 @@ var sphereMatrix;
 var planeMatrix;
 
 var sphereCenter;
+var oldSphereCenter;
 var sphereR = 0.15;
 var sphereVelocity;
 var gravity = vec4.fromValues(0.0, -0.001, 0.0, 0.0);
@@ -113,10 +114,11 @@ function initScene() {
     mat4.translate(cubeMatrix, cubeMatrix, [0.0, -0.1, 0.0]);
     mat4.scale(cubeMatrix, cubeMatrix, [1.2, 0.8, 1.2]);
     
-	sphereCenter = vec4.clone(initSphereCenter);
-	sphereMatrix = mat4.clone(initSphereMatrix);
-	sphereVelocity = vec4.clone(initVelocity);
-	sumForce = vec4.clone(initForce);
+    sphereCenter = vec4.clone(initSphereCenter);
+    oldSphereCenter = vec4.clone(initSphereCenter);
+    sphereMatrix = mat4.clone(initSphereMatrix);
+    sphereVelocity = vec4.clone(initVelocity);
+    sumForce = vec4.clone(initForce);
     
     var tmp;  
     tmp = gl.getUniformLocation(program, "objs[0].type");
@@ -305,8 +307,8 @@ function checkCollideWater() {
 			&& sphereCenter[0] > -cubeX
 			&& sphereCenter[2] < cubeZ
 			&& sphereCenter[2] > -cubeZ
-			&& (sphereCenter[1] - 0.06) < sphereR + epsilon
-			&& (sphereCenter[1] - 0.06) > sphereR - epsilon){
+			&& (oldSphereCenter[1] > 0.06)
+			&& (sphereCenter[1] < 0.06)){
 			
 			time = 100;
 			dCenter = [sphereCenter[0], 0.06, sphereCenter[2], 1.0];
@@ -414,6 +416,7 @@ function duringDrag(px, py) {
         var translation = mat4.create();
         mat4.fromTranslation(translation, moveVector);
         mat4.multiply(sphereMatrix, translation, sphereMatrix);
+        oldSphereCenter = vec4.clone(sphereCenter);
         mat4.multiply(sphereCenter, translation, sphereCenter);
         sphereVelocity = vec4.fromValues(0.0, 0.0, 0.0, 0.0); 
     
@@ -506,7 +509,7 @@ function collide() {
 	var d4 = distanceToPlane(2, 0.6, cubeZ);
 	var d5 = distanceToPlane(2, -0.6, cubeZ);
 	var d6 = distanceToPlane(3, cubeTopY1, cubeX);
-	var tmp = vec4.create();
+	var tmp = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
 	var hitN = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
 	
 	if (d1 > 0.0 && d1 < sphereR) {
@@ -518,6 +521,7 @@ function collide() {
 		vec4.add(hitN, hitN, tmp);
 	
 	}
+	
 	if (d2 > 0.0 && d2 < sphereR) {
 		if (sphereCenter[2] > 0.6) {
 			tmp = vec4.fromValues(0.0, 0.0, 1.0, 0.0);
@@ -527,6 +531,7 @@ function collide() {
 		vec4.add(hitN, hitN, tmp);
 	
 	}
+
 	if (d3 > 0.0 && d3 < sphereR) {
 		if (sphereCenter[2] > -0.6) {
 			tmp = vec4.fromValues(0.0, 0.0, 1.0, 0.0);
@@ -536,6 +541,7 @@ function collide() {
 		vec4.add(hitN, hitN, tmp);
 	
 	}
+     
 	if (d4 > 0.0 && d4 < sphereR) {
 		if (sphereCenter[0] > 0.6) {
 			tmp = vec4.fromValues(1.0, 0.0, 0.0, 0.0);
@@ -545,6 +551,7 @@ function collide() {
 		vec4.add(hitN, hitN, tmp);
 	
 	}
+	
 	if (d5 > 0.0 && d5 < sphereR) {
 		if (sphereCenter[0] > -0.6) {
 			tmp = vec4.fromValues(1.0, 0.0, 0.0, 0.0);
@@ -554,6 +561,7 @@ function collide() {
 		vec4.add(hitN, hitN, tmp);
 	
 	}
+	
 	if (d6 > 0.0 && d6 < sphereR) {
 		if (sphereCenter[1] > cubeTopY1) {
 			tmp = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
@@ -569,13 +577,13 @@ function collide() {
 
 function roundVelocity() {
 
-	if (Math.abs(sphereVelocity[0]) < 1e-6) {
+	if (Math.abs(sphereVelocity[0]) < 1e-8) {
 		sphereVelocity[0] = 0.0;
 	}
-	if (Math.abs(sphereVelocity[1]) < 1e-6) {
+	if (Math.abs(sphereVelocity[1]) < 1e-8) {
 		sphereVelocity[1] = 0.0;
 	}
-	if (Math.abs(sphereVelocity[2]) < 1e-6) {
+	if (Math.abs(sphereVelocity[2]) < 1e-8) {
 		sphereVelocity[2] = 0.0;
 	}
 
@@ -583,7 +591,7 @@ function roundVelocity() {
 function updateVelocity() {
  
     var normal = collide(); 
- 
+
     if (vec4.length(normal) > 0.01) {
 
 		var component = -1.65 * vec4.dot(normal, sphereVelocity) 
@@ -615,6 +623,7 @@ function updatePosition() {
     var moveMatrix = mat4.create();
     mat4.fromTranslation(moveMatrix, move);
     mat4.multiply(sphereMatrix, moveMatrix, sphereMatrix);
+    oldSphereCenter = vec4.clone(sphereCenter);
     vec4.add(sphereCenter, sphereCenter, sphereVelocity);
  
 }
@@ -688,6 +697,7 @@ function pause() {
 function reset() {
 	time = 100000;
 	sphereCenter = vec4.clone(initSphereCenter);
+        oldSphereCenter = vec4.clone(initSphereCenter);
 	sphereMatrix = mat4.clone(initSphereMatrix);
 	sphereVelocity = vec4.clone(initVelocity);
 	sumForce = vec4.clone(initForce);
