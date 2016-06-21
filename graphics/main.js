@@ -307,8 +307,8 @@ function checkCollideWater() {
 			&& sphereCenter[0] > -cubeX
 			&& sphereCenter[2] < cubeZ
 			&& sphereCenter[2] > -cubeZ
-			&& (oldSphereCenter[1] > 0.06)
-			&& (sphereCenter[1] < 0.06)){
+			&& (oldSphereCenter[1] > 0.06 + sphereR)
+			&& (sphereCenter[1] < 0.06 + sphereR )){
 			
 			time = 100;
 			dCenter = [sphereCenter[0], 0.06, sphereCenter[2], 1.0];
