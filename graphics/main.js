@@ -328,8 +328,9 @@ function drawScene () {
     //upload projection matrix and texture
     checkCollideWater();  
     loadParameters();
-   
-        //draw         
+  console.log("sphere center "+sphereCenter[0]+' '+ sphereCenter[1]+' '+sphereCenter[2]);
+  console.log("sum Force "+sumForce[0]+' '+sumForce[1]+' '+sumForce[2]);
+    //draw         
     program.v = gl.getAttribLocation(program, 'aVertexPosition');
     gl.enableVertexAttribArray(program.v);
      
@@ -411,7 +412,7 @@ function duringDrag(px, py) {
         
         vec3.normalize(moveVector, moveVector);
         
-        var mag = (camera.getDistance()/8)* Math.sqrt( (curX - startX) * (curX - startX)
+        var mag = 1.8 * Math.sqrt( (curX - startX) * (curX - startX)
                   + (curY - startY) * (curY - startY));
        
         vec3.scale(moveVector, moveVector, mag);
