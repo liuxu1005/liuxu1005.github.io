@@ -2,6 +2,8 @@
 
 var canvas;
 var gl;
+var viewportWidth;
+var viewportHeight;
 var mylightPosition = vec4.fromValues(0.0, 40.0, 0.0, 1.0);
 var mylightColor = vec4.fromValues(0.5, 0.8, 0.8, 1.0);
 
@@ -64,10 +66,10 @@ var paused = false;
 function initWebgl() {
     canvas = document.getElementById('Earth in Water');
     gl = canvas.getContext('webgl');
-    gl.viewportWidth = canvas.clientWidth;
-	gl.viewportHeight = canvas.clientHeight;
-	camera.setPerspective(camera.getFovy(),
-	                      gl.viewportWidth/gl.viewportHeight,
+    viewportWidth = canvas.clientWidth;
+    viewportHeight = canvas.clientHeight;
+    camera.setPerspective(camera.getFovy(),
+	                      viewportWidth/viewportHeight,
 	                      camera.getNear(),
 	                      camera.getFar());
 
@@ -219,7 +221,7 @@ function initTexture(imageName, textureID) {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.bindTexture(gl.TEXTURE_2D, null);	 
     };
@@ -284,7 +286,7 @@ function loadParameters () {
     gl.uniform1f(program.near, camera.getNear());
     
     program.viewPort = gl.getUniformLocation(program, "viewPort");
-    gl.uniform2fv(program.viewPort, [gl.viewportWidth, gl.viewportHeight]); 
+    gl.uniform2fv(program.viewPort, [viewportWidth, viewportHeight]); 
     
     program.objCount = gl.getUniformLocation(program, "objCount");
     gl.uniform1i(program.objCount, 2); 
@@ -340,8 +342,8 @@ function drawScene () {
 
 function startDrag(px, py) {
  
-    startX = (px * 2 - gl.viewportWidth)/gl.viewportWidth;
-    startY = (gl.viewportHeight - py * 2)/gl.viewportHeight;
+    startX = (px * 2 - viewportWidth)/viewportWidth;
+    startY = (viewportHeight - py * 2)/viewportHeight;
     mousedown = true;
     
     var eye = camera.getEye();
@@ -386,8 +388,8 @@ function touchStart(event) {
 }
 
 function duringDrag(px, py) {
-    var curX = (px * 2 - gl.viewportWidth)/gl.viewportWidth;
-    var curY = (gl.viewportHeight - py * 2)/gl.viewportHeight;
+    var curX = (px * 2 - viewportWidth)/viewportWidth;
+    var curY = (viewportHeight - py * 2)/viewportHeight;
 
     if (mousedown && onTarget) {
         var eye = camera.getEye();
