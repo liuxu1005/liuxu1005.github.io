@@ -15,7 +15,8 @@ And I have to be able to move the sphere around which is similar to ray tracing.
     Calculating moving direction in the world coordinate according to the mouse moving direction.
     Calculating moving distance in the world coordinate  according to the mouse moving distance.
     Update translation matrix of the sphere, which will be used next time we call drawScene(）
-    Another way is just update the translation matrix according to the position of mouse as we do in comp 175 lab. This way is better than above way.
+    Another way is just update the translation matrix according to the position of mouse as 
+    we do in comp 175 lab. This way is better than above way.
 
 Second, I have to implement recursive ray tracing with reflections and refractions in shader. This is where the most of job comes from. 
 
