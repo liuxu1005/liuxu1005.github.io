@@ -1,9 +1,11 @@
 Sphere in Water Project
+
 In this project, I planned to use WebGL to demonstrate following features: 
-Reflections and refractions 
-Collision and response
-Water wave simulation
-Caustics
+
+    Reflections and refractions 
+    Collision and response
+    Water wave simulation
+    Caustics
 
 First, I need a camera enabling me to rotate the scene. Based on what Professor Recom taught us in comp 175, this is not difficult. The camera is implemented in camera.js.
 
