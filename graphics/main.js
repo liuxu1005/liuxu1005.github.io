@@ -65,7 +65,7 @@ var paused = false;
 
 function initWebgl() {
     canvas = document.getElementById('Earth in Water');
-    gl = canvas.getContext('webgl');
+    gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
     viewportWidth = canvas.clientWidth;
     viewportHeight = canvas.clientHeight;
     camera.setPerspective(camera.getFovy(),
