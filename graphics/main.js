@@ -328,8 +328,7 @@ function drawScene () {
     //upload projection matrix and texture
     checkCollideWater();  
     loadParameters();
-  console.log("sphere center "+sphereCenter[0]+' '+ sphereCenter[1]+' '+sphereCenter[2]);
-  console.log("sum Force "+sumForce[0]+' '+sumForce[1]+' '+sumForce[2]);
+  
     //draw         
     program.v = gl.getAttribLocation(program, 'aVertexPosition');
     gl.enableVertexAttribArray(program.v);
@@ -649,23 +648,23 @@ function updateForce() {
 	    
 	    	sumForce = vec4.clone(gravity);  
 	    	
-		} else if (sphereCenter[1] > cubeBottomY + sphereR + 5 * epsilon) {
+	    } else if (sphereCenter[1] > cubeBottomY + sphereR) {
 			var tmp = vec4.create();
 			vec4.scale(tmp, sphereVelocity, -0.05); 
 			sumForce = vec4.add(sumForce, buoyance, gravity);
 			vec4.add(sumForce, sumForce, tmp);
-		} else {
+	    } else {
 			var tmp = vec4.create();
 			vec4.scale(tmp, sphereVelocity, -0.05);  
 			sumForce = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
 			vec4.add(sumForce, sumForce, tmp);
-		}
+	   }
 		
 	} else if (sphereCenter[0] < floorX && sphereCenter[0] > -floorX
 	    && sphereCenter[2] < floorZ && sphereCenter[2] > -floorZ) {
 
-  		if (sphereCenter[1] > (floorY + sphereR - 5 * epsilon) 
-  		   && sphereCenter[1] < (floorY + sphereR + 5 * epsilon)) {
+  		if (sphereCenter[1] > floorY 
+  		   && sphereCenter[1] < (floorY + sphereR)) {
 	 
 	    	sumForce = vec4.fromValues(0.0, 0.0, 0.0, 0.0);  
 	    	
