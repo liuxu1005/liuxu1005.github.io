@@ -486,14 +486,23 @@ function distanceToPlane(type, coord, edge) {
 			return Math.abs(sphereCenter[0] - coord);
 		} else { return -1.0;}
 	} else if (type == 3) {
-		if ((sphereCenter[0] < (edge + sphereR)
-			&& sphereCenter[0] > (edge - sphereR))
-			|| (sphereCenter[0] < (-edge + sphereR)
-			&& sphereCenter[0] > (-edge - sphereR))
-			|| (sphereCenter[2] < (edge + sphereR)
-			&& sphereCenter[2] > (edge - sphereR))
-			|| (sphereCenter[2] < (-edge + sphereR)
-			&& sphereCenter[2] > (-edge - sphereR))){
+		if ((sphereCenter[0] < (edge + sphereR) 
+                     && sphereCenter[0] > (edge - sphereR) 
+                     && sphereCenter[2] > (-edge - sphereR) 
+                     && sphereCenter[2] < (edge + sphereR))
+		  || (sphereCenter[0] < (-edge + sphereR) 
+                     && sphereCenter[0] > (-edge - sphereR) 
+                     && sphereCenter[2] > (-edge - sphereR) 
+                     && sphereCenter[2] < (edge + sphereR))
+
+		  || (sphereCenter[2] < (edge + sphereR)  
+                     && sphereCenter[2] > (edge - sphereR) 
+                     && sphereCenter[0] > (-edge - sphereR) 
+                     && sphereCenter[0] < (edge + sphereR)) 
+                  || (sphereCenter[2] < (-edge + sphereR) 
+                     && sphereCenter[2] > (-edge - sphereR) 
+                     && sphereCenter[0] > (-edge - sphereR) 
+                     && sphereCenter[0] < (edge + sphereR))){
 			
 			return Math.abs(sphereCenter[1] - coord);
 		} else { return -1.0;}	
