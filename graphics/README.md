@@ -21,6 +21,10 @@ And I have to be able to move the sphere around which is similar to ray tracing.
 Second, I have to implement recursive ray tracing with reflections and refractions in shader. This is where the most of job comes from. 
 
     I just draw a quad on screen in vertex shader, so that I can visit each pixel in view port.
+    (I tried another way, in which I drawn several objects and let WebGL blend the several layer 
+    by gl_blendFunc. The advantage of this way is it enable us focus on one layer each time 
+    without worry about blending. Finally I discard this way and use the way we are taught in Comp 175.)
+
     All calculations are finished in fragment shader. 
 
 The ray tracing method is the same as the one taught by Professor Remco. 
@@ -72,7 +76,7 @@ Y-axis increase will make the water surface convex so we got more light here,
 the caustics value will be positive. Y-axis decrease makes the water surface concave 
 so we got less light here, the caustics value will be negative.
 
-
+I use the gl-matrix-min.js to help me do matrix calculations.
 Another potential problem with the project is that if we raise the sphere too high, 
 the velocity of sphere when it collides with the floor will be very large due to the gravity, 
 which will make the program catch the signal too late and the sphere will partially 
