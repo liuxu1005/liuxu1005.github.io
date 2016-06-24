@@ -643,6 +643,10 @@ function updatePosition() {
 }
 
 function updateForce() {
+	if (mousedown) {
+	    sumForce = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
+	    return;
+	}
 
 	if(sphereCenter[0] < cubeX && sphereCenter[0] > -cubeX
 	         && sphereCenter[2] < cubeZ && sphereCenter[2] > - cubeZ ) {
