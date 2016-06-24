@@ -77,11 +77,6 @@ the caustics value will be positive. Y-axis decrease makes the water surface con
 so we got less light here, the caustics value will be negative.
 
 I use the gl-matrix-min.js to help me do matrix calculations.
-Another potential problem with the project is that if we raise the sphere too high, 
-the velocity of sphere when it collides with the floor will be very large due to the gravity, 
-which will make the program catch the signal too late and the sphere will partially 
-above the floor and partially below the floor.  
-
-And I also didn’t handle the case where the sphere is manually moved into the class wall.
-
+ 
+ 
 
