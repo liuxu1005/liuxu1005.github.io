@@ -29,6 +29,8 @@ var initSphereMatrix = mat4.create();
     mat4.scale(initSphereMatrix, initSphereMatrix, [0.3, 0.3, 0.3]);
    
 var initSphereCenter = vec4.fromValues(0.55, 1.0, 0.0, 1.0);
+var moveCoeff;
+
 var initForce = vec4.clone(gravity)
 var initVelocity = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
 
@@ -346,7 +348,7 @@ function startDrag(px, py) {
     startY = (viewportHeight - py * 2)/viewportHeight;
     mousedown = true;
     
-    var eye = camera.getEye();
+    var eye = quat.clone(camera.getEye());
     var near = camera.getNear();
     var point = quat.fromValues(startX, startY, -1.0, 1.0);
     quat.scale(point, point, near);
@@ -360,20 +362,21 @@ function startDrag(px, py) {
                             point[1] - eye[1],
                             point[2] - eye[2],
                                             0);
-    
+    var eye2screen = vec4.length(n);
     vec4.normalize(n, n);
      
     var tmpObjMatrix = mat4.create();   
     mat4.invert(tmpObjMatrix, sphereMatrix);
     mat4.multiply(n, tmpObjMatrix, n);
-    mat4.multiply(point, tmpObjMatrix, point);
+    mat4.multiply(eye, tmpObjMatrix, eye);
   
     var a = n[0] * n[0] + n[1] * n[1] + n[2] * n[2];
-    var b = 2 * (point[0] * n[0] + point[1] * n[1] + point[2] * n[2]);
-    var c = point[0] * point[0] + point[1] * point[1] + point[2] * point[2] - 0.25;
+    var b = 2 * (eye[0] * n[0] + eye[1] * n[1] + eye[2] * n[2]);
+    var c = eye[0] * eye[0] + eye[1] * eye[1] + eye[2] * eye[2] - 0.25;
     var tmp = (b * b) - (4 * a * c);
     if (tmp >= 0) {
         onTarget = true;
+	moveCoeff = ((-b + Math.sqrt(tmp))/(2 * a))/(188*eye2screen);
     }
 }
 
@@ -392,8 +395,8 @@ function duringDrag(px, py) {
     var curY = (viewportHeight - py * 2)/viewportHeight;
 
     if (mousedown && onTarget) {
-        var eye = camera.getEye();
-        var focus = camera.getFocus();
+        var eye = quat.clone(camera.getEye());
+        var focus = quat.clone(camera.getFocus());
         var v1 = vec3.fromValues(eye[0] - focus[0], 
                                  eye[1] - focus[1], 
                                  eye[2] - focus[2]);
@@ -411,7 +414,7 @@ function duringDrag(px, py) {
         
         vec3.normalize(moveVector, moveVector);
         
-        var mag = 1.8 * Math.sqrt( (curX - startX) * (curX - startX)
+        var mag = moveCoeff * Math.sqrt( (curX - startX) * (curX - startX)
                   + (curY - startY) * (curY - startY));
        
         vec3.scale(moveVector, moveVector, mag);
